@@ -6,7 +6,7 @@ A PIC16 and PIC18 USB Stack. Inlcuded are examples:
 - HID Keyboard + Consumer
 - HID Mouse
 - HID RubberDucky
-- MSD Interal
+- MSD Internal
 - MSD Simple
 
 Currently supports:
