@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://www.netbeans.org/ns/project/1">
+    <type>com.microchip.mplab.nbide.embedded.makeproject</type>
+    <configuration>
+        <data xmlns="http://www.netbeans.org/ns/make-project/1">
+            <name>HID_RubberDucky_Example</name>
+            <creation-uuid>8f85ba2e-7f53-486e-9445-6d7266b78a9c</creation-uuid>
+            <make-project-type>0</make-project-type>
+            <c-extensions>c</c-extensions>
+            <cpp-extensions/>
+            <header-extensions>h</header-extensions>
+            <asminc-extensions/>
+            <sourceEncoding>ISO-8859-1</sourceEncoding>
+            <make-dep-projects/>
+            <sourceRootList>
+                <sourceRootElem>../Shared Files</sourceRootElem>
+                <sourceRootElem>.</sourceRootElem>
+                <sourceRootElem>../Shared_Files</sourceRootElem>
+            </sourceRootList>
+            <confList>
+                <confElem>
+                    <name>PIC16F1454</name>
+                    <type>2</type>
+                </confElem>
+                <confElem>
+                    <name>PIC16F1455</name>
+                    <type>2</type>
+                </confElem>
+                <confElem>
+                    <name>PIC16F1459</name>
+                    <type>2</type>
+                </confElem>
+            </confList>
+            <formatting>
+                <project-formatting-style>false</project-formatting-style>
+            </formatting>
+        </data>
+    </configuration>
+</project>
