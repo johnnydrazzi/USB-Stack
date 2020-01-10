@@ -105,7 +105,7 @@ bool CDC_ClassRequest(void){
 #endif
 #ifdef USE_SET_CONTROL_LINE_STATE
         case SET_CONTROL_LINE_STATE:
-            if(SetupData.wIndex != 0) return false;
+            if(SetupData.wIndex != CDC_COM_INT) return false;
             CDC_SetControlLineState();
             USB_ArmINStatus();
             return true;

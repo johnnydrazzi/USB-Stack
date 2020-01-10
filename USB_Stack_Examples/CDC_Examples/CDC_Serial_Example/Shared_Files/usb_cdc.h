@@ -57,6 +57,9 @@
 #define CDC_COM_EP_SIZE EP1_SIZE
 #define CDC_DAT_EP_SIZE EP2_SIZE
 
+// Communication Class Interface Number
+#define CDC_COM_INT 0
+
 #ifdef _PIC14E
 #warning "CDC EP Buffer addresses need to be manually set for PIC16 devices."
 #endif

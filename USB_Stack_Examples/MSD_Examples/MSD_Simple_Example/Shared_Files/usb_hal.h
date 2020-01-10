@@ -105,6 +105,10 @@
 #define BD2_OUT   4u
 #define BD2_IN    5u
 #endif
+#if NUM_ENDPOINTS > 3
+#define BD3_OUT   6u
+#define BD3_IN    7u
+#endif
 #elif (PINGPONG_MODE == PINGPONG_0_OUT)
 #define BD0_OUT_EVEN  0u
 #define BD0_OUT_ODD   1u
@@ -114,6 +118,10 @@
 #if NUM_ENDPOINTS > 2
 #define BD2_OUT       5u
 #define BD2_IN        6u
+#endif
+#if NUM_ENDPOINTS > 3
+#define BD3_OUT       7u
+#define BD3_IN        8u
 #endif
 #elif (PINGPONG_MODE == PINGPONG_1_15)
 #define BD0_OUT      0u
@@ -127,6 +135,12 @@
 #define BD2_OUT_ODD  7u
 #define BD2_IN_EVEN  8u
 #define BD2_IN_ODD   9u
+#endif
+#if NUM_ENDPOINTS > 3
+#define BD3_OUT_EVEN 10u
+#define BD3_OUT_ODD  11u
+#define BD3_IN_EVEN  12u
+#define BD3_IN_ODD   13u
 #endif
 #elif (PINGPONG_MODE == PINGPONG_ALL_EP)
 #define BD0_OUT_EVEN  0u
@@ -142,6 +156,12 @@
 #define BD2_OUT_ODD   9u
 #define BD2_IN_EVEN   10u
 #define BD2_IN_ODD    11u
+#endif
+#if NUM_ENDPOINTS > 3
+#define BD3_OUT_EVEN  12u
+#define BD3_OUT_ODD   13u
+#define BD3_IN_EVEN   14u
+#define BD3_IN_ODD    15u
 #endif
 #endif
 /**********************************************************************/
