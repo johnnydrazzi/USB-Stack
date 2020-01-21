@@ -2,10 +2,10 @@
  * @file usb_msd.h
  * @brief <i>Mass Storage Class</i> settings, structures, global variable and function declarations.
  * @author John Izzard
- * @date 13/02/2019
+ * @date 21/01/2020
  * 
  * USB uC - MSD Library.
- * Copyright (C) 2017-2019  John Izzard
+ * Copyright (C) 2017-2020  John Izzard
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -240,7 +240,7 @@ void MSD_Arm_EP_OUT(void);
 void MSD_Arm_EP_IN(uint16_t cnt);
 #endif
 
-bool MSD_CheckForMedia(void);
+bool MSD_MediaPresent(void);
 uint8_t MSD_TestUnitReady(void);
 uint8_t MSD_StartStopUnit(void);
 void MSD_ReadCapacity(void);

@@ -2,10 +2,10 @@
  * @file usb_msd.c
  * @brief Contains <i>Mass Storage Class</i> functions.
  * @author John Izzard
- * @date 13/02/2019
+ * @date 21/01/2020
  * 
  * USB uC - MSD Library.
- * Copyright (C) 2017-2019  John Izzard
+ * Copyright (C) 2017-2020  John Izzard
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,15 +41,22 @@ static void MSD_CalcResidue(uint16_t CaseResult, uint32_t DeviceBytes);
 static uint16_t MSD_Check13Cases(uint32_t DeviceBytes, uint8_t devExpect);
 static bool MSD_CBW_Valid(void);
 static void MSD_ResetSenseData(void);
-static uint8_t MSD_FailCommand(uint8_t devExpect,uint8_t SK, uint8_t ASC, uint8_t ASCQ);
+static uint8_t MSD_FailCommand(uint8_t devExpect);
 static uint8_t MSD_NoDataResponse(uint8_t status);
 static uint8_t MSD_SendDataResponse(uint32_t DeviceBytes);
 static void MSD_CauseBOMSR(void);
+static void MSD_InvalidCommandSense(void);
+static void MSD_MediaNotPresentSense(void);
+static void MSD_UnitAttentionSense(void);
+static bool MSD_CheckForMedia(void);
 
 volatile static uint8_t MSD_STATE;
 volatile static bool EndDataInShort;
 volatile static bool WaitForBOMSR;
 volatile static bool ClearHaltEvent;
+
+volatile static bool MediaPresent;
+volatile static bool UnitAttention;
 
 volatile static uint8_t MSD_Tcnt;
 volatile static uint8_t MSD_TputIndex;
@@ -185,6 +192,7 @@ bool MSD_ClassRequest(void){
         MSD_TgetIndex = 0;
         
         WaitForBOMSR = false;
+        UnitAttention = false;
         USB_ArmINStatus();
         ControlStage = STATUS_IN_STAGE;
     }
@@ -231,6 +239,7 @@ void MSD_Init(void){
     MSD_ClearEndpointToggle();
     
     WaitForBOMSR = false;
+    UnitAttention = false;
     EndDataInShort = false;
     ClearHaltEvent = false;
     
@@ -418,26 +427,33 @@ static uint8_t MSD_ServiceCBW(void){
             if(MSD_WrProtect()){
 #endif
 #if !defined(USE_WRITE_10) || defined(USE_WR_PROTECT)
-                return MSD_FailCommand(Do,DATA_PROTECT,ASC_WRITE_PROTECTED,ASCQ_WRITE_PROTECTED);
+                MSD_ResetSenseData();
+                Fixed_Format_Sense_Data.SENSE_KEY = DATA_PROTECT;
+                Fixed_Format_Sense_Data.ADDITIONAL_SENSE_CODE = ASC_WRITE_PROTECTED;
+                Fixed_Format_Sense_Data.ADDITIONAL_SENSE_CODE_QUALIFIER = ASCQ_WRITE_PROTECTED;
+                return MSD_FailCommand(Do);
 #endif
 #if defined(USE_WRITE_10) && defined(USE_WR_PROTECT)
             }
 #endif
         case READ_10:
+#ifdef USE_WRITE_10	
+            if(CBW_Data.CBWCB0[0] == READ_10) devExpect = Di;	
+            else devExpect = Do;	
+#else	
+            devExpect = Di;	
+#endif
+            
 #ifdef USE_EXTERNAL_MEDIA
-            if(!MSD_CheckForMedia()) goto COMMAND_ERROR;
+            if(!MSD_CheckForMedia()){
+                MSD_MediaNotPresentSense();
+                return MSD_FailCommand(devExpect);
+            }
 #endif
             R_W_10_Vars.TF_LEN_BYTES[0] = Read_10_Cmd.TF_LEN_BYTES[1];
             R_W_10_Vars.TF_LEN_BYTES[1] = Read_10_Cmd.TF_LEN_BYTES[0];
             
             if(R_W_10_Vars.TF_LEN == 0) return MSD_NoDataResponse(COMMAND_PASSED);
-            
-#ifdef USE_WRITE_10
-            if(CBW_Data.CBWCB0[0] == READ_10) devExpect = Di;
-            else devExpect = Do;
-#else
-            devExpect = Di;
-#endif
             
             R_W_10_Vars.START_LBA_BYTES[0] = Read_10_Cmd.LBA_BYTES[3];
             R_W_10_Vars.START_LBA_BYTES[1] = Read_10_Cmd.LBA_BYTES[2];
@@ -445,7 +461,13 @@ static uint8_t MSD_ServiceCBW(void){
             R_W_10_Vars.START_LBA_BYTES[3] = Read_10_Cmd.LBA_BYTES[0];
             R_W_10_Vars.LBA = R_W_10_Vars.START_LBA;
             
-            if((R_W_10_Vars.LBA + R_W_10_Vars.TF_LEN) > VOL_CAPACITY_IN_BLOCKS) return MSD_FailCommand(devExpect,ILLEGAL_REQUEST,ASC_LOGICAL_BLOCK_ADDRESS_OUT_OF_RANGE,ASCQ_LOGICAL_BLOCK_ADDRESS_OUT_OF_RANGE);
+            if((R_W_10_Vars.LBA + R_W_10_Vars.TF_LEN) > VOL_CAPACITY_IN_BLOCKS){
+                MSD_ResetSenseData();
+                Fixed_Format_Sense_Data.SENSE_KEY = ILLEGAL_REQUEST;
+                Fixed_Format_Sense_Data.ADDITIONAL_SENSE_CODE = ASC_LOGICAL_BLOCK_ADDRESS_OUT_OF_RANGE;
+                Fixed_Format_Sense_Data.ADDITIONAL_SENSE_CODE_QUALIFIER = ASCQ_LOGICAL_BLOCK_ADDRESS_OUT_OF_RANGE;
+                return MSD_FailCommand(devExpect);
+            }
             
             R_W_10_Vars.TF_LEN_IN_BYTES = ((uint32_t)R_W_10_Vars.TF_LEN)*BYTES_PER_BLOCK_LE;
             
@@ -512,9 +534,25 @@ static uint8_t MSD_ServiceCBW(void){
             
         case TEST_UNIT_READY:
 #ifdef USE_EXTERNAL_MEDIA
-            if(!MSD_CheckForMedia()) return MSD_NoDataResponse(COMMAND_FAILED);
+            MediaPresent = MSD_CheckForMedia();
+            if(UnitAttention){
+                UnitAttention = false;
+                MSD_UnitAttentionSense();
+                return MSD_FailCommand(Dn);
+            }
+            
+            if(!MediaPresent){
+                MSD_MediaNotPresentSense();
+                return MSD_FailCommand(Dn);
+            }
+#else
+            if(UnitAttention){
+                UnitAttention = false;
+                MSD_UnitAttentionSense();
+                return MSD_FailCommand(Dn);
+            }    
 #endif
-            MSD_ResetSenseData();
+            
 #ifdef USE_TEST_UNIT_READY
             return MSD_NoDataResponse(MSD_TestUnitReady());
 #else
@@ -524,22 +562,18 @@ static uint8_t MSD_ServiceCBW(void){
 #ifdef USE_PREVENT_ALLOW_MEDIUM_REMOVAL
         case PREVENT_ALLOW_MEDIUM_REMOVAL:
 #ifdef USE_EXTERNAL_MEDIA
-            if(!MSD_CheckForMedia()) return MSD_NoDataResponse(COMMAND_FAILED);
+            if(!MSD_CheckForMedia()){
+                MSD_MediaNotPresentSense();
+                return MSD_FailCommand(Dn);
+            }
 #endif
-            goto COMMAND_ERROR;
+            MSD_InvalidCommandSense();
+            return MSD_FailCommand(Dn);
         break;
 #endif
             
             
         case REQUEST_SENSE:
-#ifdef USE_EXTERNAL_MEDIA
-            if(!MSD_CheckForMedia()){
-                MSD_ResetSenseData();
-                Fixed_Format_Sense_Data.SENSE_KEY = NOT_READY;
-                Fixed_Format_Sense_Data.ADDITIONAL_SENSE_CODE = ASC_MEDIUM_NOT_PRESENT;
-                Fixed_Format_Sense_Data.ADDITIONAL_SENSE_CODE_QUALIFIER = ASCQ_MEDIUM_NOT_PRESENT;
-            }
-#endif
             BytesToTransfer.LB = Request_Sense_Cmd.ALLOCATION_LENGTH;
             BytesToTransfer.HB = 0;
             if(BytesToTransfer.val){
@@ -570,11 +604,21 @@ static uint8_t MSD_ServiceCBW(void){
             
             
         case MODE_SENSE_6:
-#ifdef USE_EXTERNAL_MEDIA
-            if(!MSD_CheckForMedia()) goto COMMAND_ERROR;
-#endif
             BytesToTransfer.LB = Mode_Sense_6_Cmd.ALLOCATION_LENGTH;
             BytesToTransfer.HB = 0;
+            
+#ifdef USE_EXTERNAL_MEDIA
+            if(!MSD_CheckForMedia()){
+                MSD_MediaNotPresentSense();
+                if(BytesToTransfer.val){
+                    return MSD_FailCommand(Di);
+                }
+                else{
+                    return MSD_FailCommand(Dn);
+                }
+            }
+#endif
+            
             if(BytesToTransfer.val){
                 if(BytesToTransfer.val > 4) BytesToTransfer.val = 4;
                 Mode_Sense_Data.MODE_DATA_LENGTH=0x03;
@@ -591,7 +635,10 @@ static uint8_t MSD_ServiceCBW(void){
 #ifdef USE_START_STOP_UNIT
         case START_STOP_UNIT:
 #ifdef USE_EXTERNAL_MEDIA
-            if(!MSD_CheckForMedia()) goto COMMAND_ERROR;
+            if(!MSD_CheckForMedia()){
+                MSD_MediaNotPresentSense();
+                return MSD_FailCommand(Dn);
+            }
 #endif
 #ifdef USE_START_STOP_UNIT
             return MSD_NoDataResponse(MSD_StartStopUnit());
@@ -603,7 +650,10 @@ static uint8_t MSD_ServiceCBW(void){
             
         case READ_CAPACITY:
 #ifdef USE_EXTERNAL_MEDIA
-            if(!MSD_CheckForMedia()) goto COMMAND_ERROR;
+            if(!MSD_CheckForMedia()){
+                MSD_MediaNotPresentSense();
+                return MSD_FailCommand(Di);
+            }
 #endif
             if((Read_Capacity_10_Cmd.LOGICAL_BLOCK_ADDRESS != 0)&&(Read_Capacity_10_Cmd.PMI == 0)){
                 // CHECK CONDITION status, ILLEGAL REQUEST sense key, INVALID FIELD IN CDB sense code
@@ -638,19 +688,20 @@ static uint8_t MSD_ServiceCBW(void){
 #ifdef USE_VERIFY_10
         case VERIFY_10:
 #ifdef USE_EXTERNAL_MEDIA
-            if(!MSD_CheckForMedia()) goto COMMAND_ERROR;
+            if(!MSD_CheckForMedia()){
+                MSD_MediaNotPresentSense();
+                return MSD_FailCommand(Dn);
+            }
 #endif
             return MSD_NoDataResponse(COMMAND_PASSED);
 #endif
         default:
-#ifdef USE_EXTERNAL_MEDIA
-            COMMAND_ERROR:
-#endif
-            if(CBW_Data.bCBWCBLength){
-                if(CBW_Data.Direction) return MSD_FailCommand(Di,ILLEGAL_REQUEST,ASC_INVALID_COMMAND_OPCODE,ASCQ_INVALID_COMMAND_OPCODE);
-                else return MSD_FailCommand(Do,ILLEGAL_REQUEST,ASC_INVALID_COMMAND_OPCODE,ASCQ_INVALID_COMMAND_OPCODE);
+            MSD_InvalidCommandSense();
+            if(CBW_Data.dCBWDataTransferLength){
+                if(CBW_Data.Direction) return MSD_FailCommand(Di);
+                else return MSD_FailCommand(Do);
             }
-            else return MSD_FailCommand(Dn,ILLEGAL_REQUEST,ASC_INVALID_COMMAND_OPCODE,ASCQ_INVALID_COMMAND_OPCODE);
+            else return MSD_FailCommand(Dn);
     }
 }
 
@@ -870,27 +921,24 @@ static void MSD_ResetSenseData(void){
 //    Fixed_Format_Sense_Data.SENSE_KEY_SPECIFIC[2] = 0;
 }
 /**
- * @fn uint8_t MSD_IllegalCommand(uint8_t devExpect, uint8_t ASC, uint8_t ASCQ)
+ * @fn uint8_t MSD_FailCommand(uint8_t devExpect)
  * 
- * @brief Response to an illegal/unsupported SCSI command.
+ * @brief Response to an failed SCSI command.
  * 
  * The function will stall either MSD's IN Endpoint or OUT depending on data direction and set the
- * sense data to values indicating an illegal SCSI request occurred. A COMMAND_FAILED status
- * is returned in the CSW stage.
+ * appropriate sense data. A COMMAND_FAILED status is returned in the CSW stage.
  * 
  * @param devExpect The direction the device expects data to transfer.
- * @param ASC Additional Sense Code to be updated.
- * @param ASCQ Additional Sense Code Qualifier to be updated.
  * @return RESULT Returns the next mass storage state.
  * 
  * <b>Code Example:</b>
  * <ul style="list-style-type:none"><li>
  * @code
- * return MSD_IllegalCommand(Di, ASC_INVALID_COMMAND_OPCODE, ASCQ_INVALID_COMMAND_OPCODE);
+ * return MSD_FailCommand(Di);
  * @endcode
  * </li></ul>
  */
-static uint8_t MSD_FailCommand(uint8_t devExpect,uint8_t SK, uint8_t ASC, uint8_t ASCQ){
+static uint8_t MSD_FailCommand(uint8_t devExpect){
     uint8_t result;
     if(CBW_Data.dCBWDataTransferLength != 0){
 #if PINGPONG_MODE == PINGPONG_1_15 || PINGPONG_MODE == PINGPONG_ALL_EP
@@ -919,10 +967,6 @@ static uint8_t MSD_FailCommand(uint8_t devExpect,uint8_t SK, uint8_t ASC, uint8_
     else result = MSD_NO_DATA_STAGE;
     CSW_Data.dCSWDataResidue = CBW_Data.dCBWDataTransferLength;
     CSW_Data.bCSWStatus = COMMAND_FAILED;
-    MSD_ResetSenseData();
-    Fixed_Format_Sense_Data.SENSE_KEY = SK;
-    Fixed_Format_Sense_Data.ADDITIONAL_SENSE_CODE = ASC;
-    Fixed_Format_Sense_Data.ADDITIONAL_SENSE_CODE_QUALIFIER = ASCQ;
     return result;
 }
 
@@ -1122,3 +1166,62 @@ static bool MSD_ServiceWrite10(void){
     }
 #endif
 }
+
+/**
+ * @fn void MSD_InvalidCommandSense(void)
+ * 
+ * @brief Sets the sense values for Illegal Request.
+ */
+static void MSD_InvalidCommandSense(void){
+    MSD_ResetSenseData();
+    Fixed_Format_Sense_Data.SENSE_KEY = ILLEGAL_REQUEST;
+    Fixed_Format_Sense_Data.ADDITIONAL_SENSE_CODE = ASC_INVALID_COMMAND_OPCODE;
+    Fixed_Format_Sense_Data.ADDITIONAL_SENSE_CODE_QUALIFIER = ASCQ_INVALID_COMMAND_OPCODE;
+}
+
+/**
+ * @fn void MSD_MediaNotPresentSense(void)
+ * 
+ * @brief Sets the sense values for condition when media isn't present.
+ */
+static void MSD_MediaNotPresentSense(void){
+    MSD_ResetSenseData();
+    Fixed_Format_Sense_Data.SENSE_KEY = NOT_READY;
+    Fixed_Format_Sense_Data.ADDITIONAL_SENSE_CODE = ASC_MEDIUM_NOT_PRESENT;
+    Fixed_Format_Sense_Data.ADDITIONAL_SENSE_CODE_QUALIFIER = ASCQ_MEDIUM_NOT_PRESENT;
+}
+
+/**
+ * @fn void MSD_UnitAttentionSense(void)
+ * 
+ * @brief Sets the sense values for Unit Attention.
+ */
+static void MSD_UnitAttentionSense(void){
+    MSD_ResetSenseData();
+    Fixed_Format_Sense_Data.SENSE_KEY = UNIT_ATTENTION;
+    Fixed_Format_Sense_Data.ADDITIONAL_SENSE_CODE = ASC_NOT_READY_TO_READY_CHANGE;
+    Fixed_Format_Sense_Data.ADDITIONAL_SENSE_CODE_QUALIFIER = ASCQ_MEDIUM_MAY_HAVE_CHANGED;
+}
+
+#ifdef USE_EXTERNAL_MEDIA
+/**
+ * @fn bool MSD_CheckForMedia(void)
+ * 
+ * @brief Checks to see if media is present/available. Also sets UnitAttention 
+ * value to true when the media availability changes.
+ * 
+ * @return Returns true when media is present.
+ */
+static bool MSD_CheckForMedia(void){
+    static bool prev_val = false;
+    bool return_val;
+    
+    return_val = MSD_MediaPresent();
+    
+    if(return_val != prev_val) UnitAttention = true;
+    
+    prev_val = return_val;
+    
+    return return_val;
+}
+#endif
