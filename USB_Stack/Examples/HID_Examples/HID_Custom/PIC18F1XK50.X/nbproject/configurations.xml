@@ -17,7 +17,6 @@
       </logicalFolder>
       <itemPath>../Shared_Files/config.h</itemPath>
       <itemPath>../Shared_Files/fuses.h</itemPath>
-      <itemPath>../Shared_Files/usb_hid.h</itemPath>
       <itemPath>../Shared_Files/usb_hid_reports.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
@@ -57,7 +56,7 @@
         <targetDevice>PIC18F14K50</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>noID</platformTool>
+        <platformTool></platformTool>
         <languageToolchain>XC8</languageToolchain>
         <languageToolchainVersion>2.20</languageToolchainVersion>
         <platform>3</platform>
@@ -237,7 +236,7 @@
         <targetDevice>PIC18F14K50</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>noID</platformTool>
+        <platformTool></platformTool>
         <languageToolchain>XC8</languageToolchain>
         <languageToolchainVersion>2.20</languageToolchainVersion>
         <platform>3</platform>
