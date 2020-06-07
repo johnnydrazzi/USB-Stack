@@ -37,6 +37,7 @@ A PIC16 and PIC18 Device USB Stack. Supports all pingpong buffering types. Suppo
 - usb_hid_reports.h
 - usb_hid_reports.c
 - usb_msd_config.h
+- usb_scsi_inq.c
 
 **Getting Started:**
 1. Choose an example to open.
