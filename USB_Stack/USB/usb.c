@@ -245,112 +245,11 @@ static void sync_frame(void);
 
 void usb_init(void)
 {
-    USB_INTERRUPT_ENABLE_REGISTER       = INTERRUPTS_MASK;
-    USB_ERROR_INTERRUPT_ENABLE_REGISTER = ERROR_INTERRUPT_MASK;
-    
-    USB_INTERRUPT_STAT_REGISTER       = 0;   // Interrupt flags cleared
-    USB_ERROR_INTERRUPT_STAT_REGISTER = 0;
-    
-    USB_EP0_CONTROL_REGISTER = 0; // Disable EP0
-    
-    // Disable EPs > EP0 
-    #if NUM_ENDPOINTS > 1 
-    USB_EP1_CONTROL_REGISTER = _EPCONDIS;
-    #endif
-    #if NUM_ENDPOINTS > 2
-    USB_EP2_CONTROL_REGISTER = _EPCONDIS;
-    #endif
-    #if NUM_ENDPOINTS > 3
-    USB_EP3_CONTROL_REGISTER = _EPCONDIS;
-    #endif
-    #if NUM_ENDPOINTS > 4
-    USB_EP4_CONTROL_REGISTER = _EPCONDIS;
-    #endif
-    #if NUM_ENDPOINTS > 5
-    USB_EP5_CONTROL_REGISTER = _EPCONDIS;
-    #endif
-    #if NUM_ENDPOINTS > 6
-    USB_EP6_CONTROL_REGISTER = _EPCONDIS;
-    #endif
-    #if NUM_ENDPOINTS > 7
-    USB_EP7_CONTROL_REGISTER = _EPCONDIS;
-    #endif
-    
-    UADDR = 0x00;// Address starts off at 0x00
-    
-    // USB Settings
-    m_dev_settings.Self_Powered  = POWERED_TYPE;
-    m_dev_settings.Remote_Wakeup = REMOTE_WAKEUP;
-    USB_CONFIGURATION_REGISTER = SPEED_PULLUP | USB_SPEED | PPB;
-    
-    // Clear BDT Entries
-    usb_ram_set(0, (uint8_t*)g_usb_bd_table, BDT_SIZE);
-    
-    // Setup BDT for EP0 OUT
-    #if PINGPONG_MODE == PINGPONG_ALL_EP || PINGPONG_MODE == PINGPONG_0_OUT
-    g_usb_bd_table[BD0_OUT_EVEN].ADR = EP0_OUT_EVEN_BUFFER_BASE_ADDR;
-    g_usb_bd_table[BD0_OUT_ODD].ADR  = EP0_OUT_ODD_BUFFER_BASE_ADDR;
-    #else
-    g_usb_bd_table[BD0_OUT].ADR = EP0_OUT_BUFFER_BASE_ADDR;
-    #endif
-    
-    // Setup BDT for EP0 IN
-    #if PINGPONG_MODE == PINGPONG_ALL_EP
-    g_usb_bd_table[BD0_IN_EVEN].ADR = EP0_IN_EVEN_BUFFER_BASE_ADDR;
-    g_usb_bd_table[BD0_IN_ODD].ADR  = EP0_IN_ODD_BUFFER_BASE_ADDR;
-    #else
-    g_usb_bd_table[BD0_IN].ADR = EP0_IN_BUFFER_BASE_ADDR;
-    #endif
-    
-    // Clear EP statuses
-    usb_ram_set(0, (uint8_t*)g_usb_ep_stat, EP_STAT_SIZE);
-    
-    #if PINGPONG_MODE != PINGPONG_DIS
-    // Last_PPB starts on ODD
-    for(uint8_t i = 0; i < NUM_ENDPOINTS; i++)
-    {
-        g_usb_ep_stat[i][0].Last_PPB = ODD;
-        g_usb_ep_stat[i][1].Last_PPB = ODD;
-    }
-    #endif
-    
-    m_update_address = false;
-    g_usb_send_short = false;
-    
-    m_current_configuration = 0;
-    
-    while(TRANSACTION_COMPLETE_FLAG) TRANSACTION_COMPLETE_FLAG = 0; // Clear USTAT
-    PACKET_TRANSFER_DISABLE = 0;
-    
-    // EP0 Settings for control
-    USB_EP0_CONTROL_REGISTER = _EPHSHK | _EPOUTEN | _EPINEN;
-    
-    if(m_usb_state == STATE_DETACHED)
-    {
-        USB_MODULE_ENABLE = 1;
-        m_usb_state = STATE_ATTACHED;
-        while(SINGLR_ENDED_ZERO){}
-        m_usb_state = STATE_POWERED;
-    }
-    
-    m_control_stage = SETUP_STAGE;
-    
-    #if PINGPONG_MODE != PINGPONG_DIS
-    PPB_RESET = 1; // Reset Ping-Pong Buffer Pointers to Even
-    NOP();
-    NOP();
-    NOP();
-    NOP();
-    PPB_RESET = 0;
-    #endif
-    
-    #if PINGPONG_MODE == PINGPONG_DIS || PINGPONG_MODE == PINGPONG_1_15
-    arm_setup();
-    #else
-    arm_setup();
-    g_usb_ep_stat[EP0][OUT].Last_PPB = EVEN;
-    arm_setup();
-    #endif
+    USB_INTERRUPT_ENABLE_REGISTER = _URSTIE;
+    RESET_CONDITION_FLAG = 1; // Force a reset so that initialization happens
+                              // inside the interrupt context (if interrupts 
+                              // are used). Saves the compiler from creating
+                              // duplicate code.
 }
 
 void usb_close(void)
@@ -734,7 +633,62 @@ void usb_ram_set(uint8_t val, uint8_t *p_ram, uint16_t bytes)
 
 static void usb_restart(void)
 {
+    USB_INTERRUPT_ENABLE_REGISTER       = INTERRUPTS_MASK;
+    USB_ERROR_INTERRUPT_ENABLE_REGISTER = ERROR_INTERRUPT_MASK;
+    
+    USB_INTERRUPT_STAT_REGISTER       = 0;   // Interrupt flags cleared
+    USB_ERROR_INTERRUPT_STAT_REGISTER = 0;
+    
+    USB_EP0_CONTROL_REGISTER = 0; // Disable EP0
+    
+    // Disable EPs > EP0 
+    #if NUM_ENDPOINTS > 1 
+    USB_EP1_CONTROL_REGISTER = _EPCONDIS;
+    #endif
+    #if NUM_ENDPOINTS > 2
+    USB_EP2_CONTROL_REGISTER = _EPCONDIS;
+    #endif
+    #if NUM_ENDPOINTS > 3
+    USB_EP3_CONTROL_REGISTER = _EPCONDIS;
+    #endif
+    #if NUM_ENDPOINTS > 4
+    USB_EP4_CONTROL_REGISTER = _EPCONDIS;
+    #endif
+    #if NUM_ENDPOINTS > 5
+    USB_EP5_CONTROL_REGISTER = _EPCONDIS;
+    #endif
+    #if NUM_ENDPOINTS > 6
+    USB_EP6_CONTROL_REGISTER = _EPCONDIS;
+    #endif
+    #if NUM_ENDPOINTS > 7
+    USB_EP7_CONTROL_REGISTER = _EPCONDIS;
+    #endif
+    
     UADDR = 0x00;// Address starts off at 0x00
+    
+    // USB Settings
+    m_dev_settings.Self_Powered  = POWERED_TYPE;
+    m_dev_settings.Remote_Wakeup = REMOTE_WAKEUP;
+    USB_CONFIGURATION_REGISTER = SPEED_PULLUP | USB_SPEED | PPB;
+    
+    // Clear BDT Entries
+    usb_ram_set(0, (uint8_t*)g_usb_bd_table, BDT_SIZE);
+    
+    // Setup BDT for EP0 OUT
+    #if PINGPONG_MODE == PINGPONG_ALL_EP || PINGPONG_MODE == PINGPONG_0_OUT
+    g_usb_bd_table[BD0_OUT_EVEN].ADR = EP0_OUT_EVEN_BUFFER_BASE_ADDR;
+    g_usb_bd_table[BD0_OUT_ODD].ADR  = EP0_OUT_ODD_BUFFER_BASE_ADDR;
+    #else
+    g_usb_bd_table[BD0_OUT].ADR = EP0_OUT_BUFFER_BASE_ADDR;
+    #endif
+    
+    // Setup BDT for EP0 IN
+    #if PINGPONG_MODE == PINGPONG_ALL_EP
+    g_usb_bd_table[BD0_IN_EVEN].ADR = EP0_IN_EVEN_BUFFER_BASE_ADDR;
+    g_usb_bd_table[BD0_IN_ODD].ADR  = EP0_IN_ODD_BUFFER_BASE_ADDR;
+    #else
+    g_usb_bd_table[BD0_IN].ADR = EP0_IN_BUFFER_BASE_ADDR;
+    #endif
     
     // Clear EP statuses
     usb_ram_set(0, (uint8_t*)g_usb_ep_stat, EP_STAT_SIZE);
@@ -748,13 +702,26 @@ static void usb_restart(void)
     }
     #endif
     
-    m_update_address        = false;
-    g_usb_send_short        = false;
+    m_update_address = false;
+    g_usb_send_short = false;
+    
     m_current_configuration = 0;
-    m_control_stage         = SETUP_STAGE;
     
     while(TRANSACTION_COMPLETE_FLAG) TRANSACTION_COMPLETE_FLAG = 0; // Clear USTAT
     PACKET_TRANSFER_DISABLE = 0;
+    
+    // EP0 Settings for control
+    USB_EP0_CONTROL_REGISTER = _EPHSHK | _EPOUTEN | _EPINEN;
+    
+    if(m_usb_state == STATE_DETACHED)
+    {
+        USB_MODULE_ENABLE = 1;
+        m_usb_state = STATE_ATTACHED;
+        while(SINGLR_ENDED_ZERO){}
+        m_usb_state = STATE_POWERED;
+    }
+    
+    m_control_stage = SETUP_STAGE;
     
     #if PINGPONG_MODE != PINGPONG_DIS
     PPB_RESET = 1; // Reset Ping-Pong Buffer Pointers to Even

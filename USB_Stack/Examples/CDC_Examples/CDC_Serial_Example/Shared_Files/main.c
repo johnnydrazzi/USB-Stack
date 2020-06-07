@@ -96,8 +96,8 @@ static void __interrupt() isr(void);
 static void serial_print_string(char* string);
 static void serial_echo(void);
 
-static bool volatile m_rx_sent = true;
-static bool volatile m_tx_rcv = false;
+static bool volatile m_serial_pkt_sent = true;
+static bool volatile m_serial_pkt_rcv = false;
 
 void main(void)
 {
@@ -205,12 +205,12 @@ void cdc_set_line_coding(void)
 
 void cdc_data_out(void)
 {
-    m_tx_rcv = true;
+    m_serial_pkt_rcv = true;
 }
 
 void cdc_data_in(void)
 {
-    m_rx_sent = true;
+    m_serial_pkt_sent = true;
 }
 
 void cdc_notification(void)
@@ -223,31 +223,31 @@ static void serial_print_string(char* string)
     uint8_t i = 0;
     while(*string)
     {
-        while(!m_rx_sent){}
+        while(!m_serial_pkt_sent){}
         g_cdc_dat_ep_in[i++] = *string++;
         if(i == CDC_DAT_EP_SIZE)
         {
-            m_rx_sent = false;
+            m_serial_pkt_sent = false;
             cdc_arm_data_ep_in(CDC_DAT_EP_SIZE);
             i = 0;
         }
     }
     if(i)
     {
-        while(!m_rx_sent){}
-        m_rx_sent = false;
+        while(!m_serial_pkt_sent){}
+        m_serial_pkt_sent = false;
         cdc_arm_data_ep_in(i);
     }
 }
 
 static void serial_echo(void)
 {
-    if(m_tx_rcv && m_rx_sent)
+    if(m_serial_pkt_rcv && m_serial_pkt_sent)
     {
         usb_ram_copy(g_cdc_dat_ep_out, g_cdc_dat_ep_in, g_cdc_num_data_out);
-        m_rx_sent = false;
+        m_serial_pkt_sent = false;
         cdc_arm_data_ep_in(g_cdc_num_data_out);
-        m_tx_rcv = false;
+        m_serial_pkt_rcv = false;
         cdc_arm_data_ep_out();
     }
 }

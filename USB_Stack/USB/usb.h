@@ -315,8 +315,8 @@ void usb_tasks(void);
  * 
  * @brief Sets up USB for operation.
  * 
- * Firstly resets USB peripheral to default values, clears out endpoints,
- * and sets variables starting values for first operation.
+ * Firstly forces the USB reset flag high and then the usb_restart function is 
+ * run.
  */
 void usb_init(void);
 

@@ -99,8 +99,8 @@ static void vcp_tasks(void);
 #define RX_BUFFER_SIZE 64
 #define TX_BUFFER_SIZE 64
 
-static bool volatile m_rx_sent = true;
-static bool volatile m_tx_rcv = false;
+static bool volatile m_serial_pkt_sent = true;
+static bool volatile m_serial_pkt_rcv = false;
 
 static uint8_t m_rx_buffer[RX_BUFFER_SIZE];
 static uint8_t m_rx_index = 0;
@@ -225,12 +225,12 @@ void cdc_set_line_coding(void)
 
 void cdc_data_out(void)
 {
-    m_tx_rcv = true;
+    m_serial_pkt_rcv = true;
 }
 
 void cdc_data_in(void)
 {
-    m_rx_sent = true;
+    m_serial_pkt_sent = true;
 }
 
 void cdc_notification(void)
@@ -256,9 +256,9 @@ static void vcp_tasks(void)
     }                                                                            // If this is false (buffer is full) data will be lost.
 
     // If there is data in m_rx_buffer and USB is not busy, send it.
-    if(m_rx_sent && m_rx_index)
+    if(m_serial_pkt_sent && m_rx_index)
     {
-        m_rx_sent = false;
+        m_serial_pkt_sent = false;
         usb_ram_copy(m_rx_buffer, g_cdc_dat_ep_in, m_rx_index);
         cdc_arm_data_ep_in(m_rx_index);
         m_rx_index = 0;
@@ -268,17 +268,17 @@ static void vcp_tasks(void)
         #endif
     }
 
-    // If Tx Data was received on the USB endpoint, and UART currently has no data to send.
-    if(m_tx_rcv && (m_tx_to_cpy == 0))
+    // If serial data was received on the CDC endpoint, and UART currently has no data to send.
+    if(m_serial_pkt_rcv && (m_tx_to_cpy == 0))
     {
-        m_tx_rcv = false;                        // Reset TxRcv.
+        m_serial_pkt_rcv = false;                // Reset m_serial_pkt_rcv.
         m_tx_to_cpy = g_cdc_num_data_out;        // Number of bytes to grab from EP.
         m_tx_index = 0;                          // Reset m_tx_index.
         usb_ram_copy(g_cdc_dat_ep_out, m_tx_buffer, m_tx_to_cpy); // Copy from endpoint to m_tx_buffer.
         cdc_arm_data_ep_out();
     }
 
-    // If there is data in m_tx_buffer, send it over UART.
+    // If there is data in m_tx_buffer, send one byte over UART.
     if(m_tx_to_cpy)
     {
         #if defined(USE_RTS) && !defined(USE_DTR)
