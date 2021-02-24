@@ -2,10 +2,10 @@
  * @file usb_hid_config.h
  * @brief Contains HID user settings.
  * @author John Izzard
- * @date 05/06/2020
+ * @date 24/02/2021
  * 
  * USB uC - USB Stack.
- * Copyright (C) 2017-2020  John Izzard
+ * Copyright (C) 2017-2021  John Izzard
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@
 #define HID_EP_SIZE EP1_SIZE
 
 #ifdef _PIC14E
-#warning "HID EP Buffer addresses need to be manually set for PIC16 devices."
+#warning "HID EP Buffer addresses have been manually set for PIC16 devices."
 #endif
 
 #define HID_BD_OUT      BD1_OUT

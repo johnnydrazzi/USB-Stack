@@ -2,10 +2,10 @@
  * @file main.c
  * @brief Main C file.
  * @author John Izzard
- * @date 05/06/2020
+ * @date 24/02/2021
  * 
  * HID Custom Example.
- * Copyright (C) 2017-2020  John Izzard
+ * Copyright (C) 2017-2021  John Izzard
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -120,7 +120,7 @@ void main(void)
     {
         if(m_out_event)
         {
-            switch(g_hid_in_report1.array[0])
+            switch(g_hid_out_report1.array[0])
             {
                 case COMMAND_TOGGLE_LED:
                     LED ^= 1;

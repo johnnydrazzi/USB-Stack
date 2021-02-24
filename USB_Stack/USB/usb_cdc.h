@@ -2,10 +2,10 @@
  * @file usb_cdc.h
  * @brief <i>Communications Device Class</i> core header file.
  * @author John Izzard
- * @date 05/06/2020
+ * @date 24/02/2021
  * 
  * USB uC - CDC Library.
- * Copyright (C) 2017-2020  John Izzard
+ * Copyright (C) 2017-2021  John Izzard
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,11 +46,11 @@
 /* ************************************************************************** */
 
 /* ************************************************************************** */
-/* ************************** WARNING FOR PIC14 ***************************** */
+/* ************************** WARNING FOR PIC16 ***************************** */
 /* ************************************************************************** */
 
 #ifdef _PIC14E
-#warning "CDC EP Buffer addresses need to be manually set for PIC16 devices."
+#warning "CDC EP Buffer addresses have been manually set for PIC16 devices."
 #endif
 
 /* ************************************************************************** */
