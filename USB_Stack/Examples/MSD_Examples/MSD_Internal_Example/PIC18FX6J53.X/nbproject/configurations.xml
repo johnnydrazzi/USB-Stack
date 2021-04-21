@@ -136,7 +136,7 @@
         <property key="calibrate-oscillator-value" value="0x3400"/>
         <property key="clear-bss" value="true"/>
         <property key="code-model-external" value="wordwrite"/>
-        <property key="code-model-rom" value="0-27FF"/>
+        <property key="code-model-rom" value="0-1FFF"/>
         <property key="create-html-files" value="false"/>
         <property key="data-model-ram" value=""/>
         <property key="data-model-size-of-double" value="32"/>
@@ -148,7 +148,7 @@
         <property key="display-overall-usage" value="true"/>
         <property key="display-psect-usage" value="false"/>
         <property key="extra-lib-directories" value=""/>
-        <property key="fill-flash-options-addr" value="0x2000:0x7fff"/>
+        <property key="fill-flash-options-addr" value="0x2000:0xFBFF"/>
         <property key="fill-flash-options-const" value="0"/>
         <property key="fill-flash-options-how" value="1"/>
         <property key="fill-flash-options-inc-const" value="1"/>
@@ -235,7 +235,7 @@
         <targetDevice>PIC18F26J53</targetDevice>
         <targetHeader></targetHeader>
         <targetPluginBoard></targetPluginBoard>
-        <platformTool>noID</platformTool>
+        <platformTool></platformTool>
         <languageToolchain>XC8</languageToolchain>
         <languageToolchainVersion>2.20</languageToolchainVersion>
         <platform>3</platform>
@@ -328,7 +328,7 @@
         <property key="display-overall-usage" value="true"/>
         <property key="display-psect-usage" value="false"/>
         <property key="extra-lib-directories" value=""/>
-        <property key="fill-flash-options-addr" value="0x2000:0x7fff"/>
+        <property key="fill-flash-options-addr" value="0x2000:0xFBFF"/>
         <property key="fill-flash-options-const" value="0"/>
         <property key="fill-flash-options-how" value="1"/>
         <property key="fill-flash-options-inc-const" value="1"/>
@@ -496,7 +496,7 @@
         <property key="calibrate-oscillator-value" value="0x3400"/>
         <property key="clear-bss" value="true"/>
         <property key="code-model-external" value="wordwrite"/>
-        <property key="code-model-rom" value="0-27FF"/>
+        <property key="code-model-rom" value="0-1FFF"/>
         <property key="create-html-files" value="false"/>
         <property key="data-model-ram" value=""/>
         <property key="data-model-size-of-double" value="32"/>
@@ -508,7 +508,7 @@
         <property key="display-overall-usage" value="true"/>
         <property key="display-psect-usage" value="false"/>
         <property key="extra-lib-directories" value=""/>
-        <property key="fill-flash-options-addr" value="0x2000:0x7fff"/>
+        <property key="fill-flash-options-addr" value="0x2000:0xFBFF"/>
         <property key="fill-flash-options-const" value="0"/>
         <property key="fill-flash-options-how" value="1"/>
         <property key="fill-flash-options-inc-const" value="1"/>
@@ -688,7 +688,7 @@
         <property key="display-overall-usage" value="true"/>
         <property key="display-psect-usage" value="false"/>
         <property key="extra-lib-directories" value=""/>
-        <property key="fill-flash-options-addr" value="0x2000:0x7fff"/>
+        <property key="fill-flash-options-addr" value="0x2000:0xFBFF"/>
         <property key="fill-flash-options-const" value="0"/>
         <property key="fill-flash-options-how" value="1"/>
         <property key="fill-flash-options-inc-const" value="1"/>

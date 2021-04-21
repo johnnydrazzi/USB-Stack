@@ -2,10 +2,10 @@
  * @file main.c
  * @brief Main C file.
  * @author John Izzard
- * @date 05/06/2020
+ * @date 21/04/2021
  * 
  * MSD Internal Example.
- * Copyright (C) 2017-2020  John Izzard
+ * Copyright (C) 2017-2021  John Izzard
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,16 +23,11 @@
 
 #include <xc.h>
 #include <stdint.h>
-#include <pic18.h>
 #include "fuses.h"
 #include "config.h"
 #include "../../../../USB/usb.h"
 #include "../../../../USB/usb_msd.h"
 #include "../Shared_Files/flash.h"
-
-#if !defined(MSD_LIMITED_RAM) && !defined(__J_PART)
-#error "Must use MSD_LIMITED_RAM option for this example."
-#endif
 
 #if defined(_PIC14E)
 /* PIC16F145X ROM Space
@@ -51,7 +46,7 @@
     0x1000D |______________|
  */
 
-#if _HTC_EDITION_ == 0 // Free Version - put ROM range as 0-27FF
+#if _HTC_EDITION_ == 0
 #error "Don't even bother trying to do this in Free Mode!"
 #else                  // Standard/Pro Version - put ROM range as 0-1FFF
 #define FLASH_SPACE_START     0x01000
@@ -68,23 +63,7 @@
 
 
 #elif defined(_18F14K50)
-/* PIC18F14K50 ROM Space (Free Compiler)
-             ______________
-    0x00000 |____RESET_____|
-    0x00008 |____INT_HP____|
-    0x00018 |____INT_LP____| 0x2800 (10KB)
-            |              |
-            |     CODE     |
-    0x027FF |______________|
-    0x02800 |              |
-            | FLASH SPACE  | 0x1800 (6KB) 
-    0x03FFF |______________|
-   0x300000 |              |
-            | CONFIG WORDS | 0x0E
-   0x30000D |______________|
- */
-
-/* PIC18F14K50 ROM Space (Std/Pro Compiler)
+/* PIC18F14K50 ROM Space
              ______________
     0x00000 |____RESET_____|
     0x00008 |____INT_HP____|
@@ -99,12 +78,8 @@
             | CONFIG WORDS | 0x0E
    0x30000D |______________|
  */
-
-#if _HTC_EDITION_ == 0 // Free Version - put ROM range as 0-27FF
-#define FLASH_SPACE_START     0x02800
-#else                  // Standard/Pro Version - put ROM range as 0-1FFF
-#define FLASH_SPACE_START     0x02000
-#endif
+           
+#define FLASH_SPACE_START     0x02000 // Put ROM range as 0-1FFF
 #define END_OF_FLASH          0x04000
 
 #define BOOT_START            FLASH_SPACE_START
@@ -121,23 +96,7 @@
 
 
 #elif defined(_18F24K50)
-/* PIC18F24K50 ROM Space (Free Compiler)
-             ______________
-    0x00000 |____RESET_____|
-    0x00008 |____INT_HP____|
-    0x00018 |____INT_LP____| 0x2800 (10KB)
-            |              |
-            |     CODE     |
-    0x027FF |______________|
-    0x02800 |              |
-            | FLASH SPACE  | 0x1800 (6KB) 
-    0x03FFF |______________|
-   0x300000 |              |
-            | CONFIG WORDS | 0x0E
-   0x30000D |______________|
- */
-
-/* PIC18F24K50 ROM Space (Std/Pro Compiler)
+/* PIC18F24K50 ROM Space
              ______________
     0x00000 |____RESET_____|
     0x00008 |____INT_HP____|
@@ -153,11 +112,7 @@
    0x30000D |______________|
  */
 
-#if _HTC_EDITION_ == 0 // Free Version - put ROM range as 0-27FF
-#define FLASH_SPACE_START     0x02800
-#else                  // Standard/Pro Version - put ROM range as 0-1FFF
-#define FLASH_SPACE_START     0x02000
-#endif
+#define FLASH_SPACE_START     0x02000 // Put ROM range as 0-1FFF
 #define END_OF_FLASH          0x04000
 
 #define BOOT_START            FLASH_SPACE_START
@@ -174,23 +129,7 @@
 
 
 #elif defined(_18F25K50) || defined(_18F45K50)
-/* PIC18FX5K50 ROM Space (Free Compiler)
-             ______________
-    0x00000 |____RESET_____|
-    0x00008 |____INT_HP____|
-    0x00018 |____INT_LP____| 0x2800 (10KB)
-            |              |
-            |     CODE     |
-    0x027FF |______________|
-    0x02800 |              |
-            | FLASH SPACE  | 0x5800 (22KB) 
-    0x07FFF |______________|
-   0x300000 |              |
-            | CONFIG WORDS | 0x0E
-   0x30000D |______________|
- */
-
-/* PIC18FX5K50 ROM Space (Std/Pro Compiler)
+/* PIC18FX5K50 ROM Space
              ______________
     0x00000 |____RESET_____|
     0x00008 |____INT_HP____|
@@ -206,11 +145,8 @@
    0x30000D |______________|
  */
 
-#if _HTC_EDITION_ == 0 // Free Version - put ROM range as 0-27FF
-#define FLASH_SPACE_START     0x02800
-#else                  // Standard/Pro Version - put ROM range as 0-1FFF
-#define FLASH_SPACE_START     0x02000
-#endif
+
+#define FLASH_SPACE_START     0x02000 // Put ROM range as 0-1FFF
 #define END_OF_FLASH          0x08000
 
 #define BOOT_START            FLASH_SPACE_START
@@ -227,23 +163,7 @@
 
 
 #elif defined(_18F26J53) || defined(_18F46J53)
-/* PIC18FX6J53 ROM Space (Free Compiler)
-             ______________
-    0x00000 |____RESET_____|
-    0x00008 |____INT_HP____|
-    0x00018 |____INT_LP____| 0x2800 (10KB)
-            |              |
-            |     CODE     |
-    0x027FF |______________|
-    0x02800 |              |
-            | FLASH SPACE  | 0xD400 (53KB) 
-    0x0FBFF |______________|
-    0x0FC00 |              |
-            | CONFIG WORDS | 0x400 (1KB)
-    0x10000 |______________|
- */
-
-/* PIC18FX6J53 ROM Space (Std/Pro Compiler)
+/* PIC18FX6J53 ROM Space
              ______________
     0x00000 |____RESET_____|
     0x00008 |____INT_HP____|
@@ -259,12 +179,8 @@
     0x10000 |______________|
  */
 
-#if _HTC_EDITION_ == 0 // Free Version - put ROM range as 0-27FF
-#define FLASH_SPACE_START     0x02800
-#else                  // Standard/Pro Version - put ROM range as 0-1FFF
-#define FLASH_SPACE_START     0x02000
-#endif
-#define END_OF_FLASH          0x1FC00
+#define FLASH_SPACE_START     0x02000 // Put ROM range as 0-1FFF
+#define END_OF_FLASH          0x0FC00
 
 #define BOOT_START            FLASH_SPACE_START
 #define BOOT_SIZE             62
@@ -278,23 +194,7 @@
 
 
 #elif defined(_18F27J53) || defined(_18F47J53)
-/* PIC18FX7J53 ROM Space (Free Compiler)
-             ______________
-    0x00000 |____RESET_____|
-    0x00008 |____INT_HP____|
-    0x00018 |____INT_LP____| 0x2800 (10KB)
-            |              |
-            |     CODE     |
-    0x027FF |______________|
-    0x02800 |              |
-            | FLASH SPACE  | 0x1D400 (117KB) 
-    0x1FBFF |______________|
-    0x1FC00 |              |
-            | CONFIG WORDS | 0x400 (1KB)
-    0x20000 |______________|
- */
-
-/* PIC18FX7J53 ROM Space (Std/Pro Compiler)
+/* PIC18FX7J53 ROM Space
              ______________
     0x00000 |____RESET_____|
     0x00008 |____INT_HP____|
@@ -310,11 +210,7 @@
     0x20000 |______________|
  */
 
-#if _HTC_EDITION_ == 0 // Free Version - put ROM range as 0-27FF
-#define FLASH_SPACE_START     0x02800
-#else                  // Standard/Pro Version - put ROM range as 0-1FFF
-#define FLASH_SPACE_START     0x02000
-#endif
+#define FLASH_SPACE_START     0x02000 // Put ROM range as 0-1FFF
 #define END_OF_FLASH          0x1FC00
 
 #define BOOT_START            FLASH_SPACE_START
@@ -330,7 +226,7 @@
 
 /*
  * The code directly below will pre-format the drive in such a way that we make use of most of the space.
- * Using our format method, we get 2.5KB volume.
+ * Using our format method, we get 20.5KB volume.
  * 
  * You can gain another 1KB when you disable System Volume Information folder creation on 
  * removable drives in windows (Windows 8.1/10).
@@ -532,25 +428,32 @@ void msd_rx_sector(void)
     if(addr < END_OF_FLASH) // If address is in flash space.
     {
         #if defined(_PIC14E)
-        #error "Double buffering is not yet supported for PIC16 in this example, just not enough space." 
-//        uint8_t *p_ep;
-//        if(MSD_EP_IN_LAST_PPB == ODD) p_ep = g_msd_ep_in_odd;
-//        else p_ep = g_msd_ep_in_even;
-//        
-//        Flash_ReadBytes((uint24_t)(addr + g_msd_byte_of_sect), 64, buffer);
-//        for(i = 0, x = 0; i < 64; i += 2, x++) p_ep[x] = buffer[i];
-//        Flash_ReadBytes((uint24_t)(addr + 32 + g_msd_byte_of_sect), 64, buffer);
-//        for(i = 0, x = 32; i < 64; i += 2, x++) p_ep[x] = buffer[i];
+        uint8_t *p_ep;
+        if(MSD_EP_IN_LAST_PPB == ODD) p_ep = g_msd_ep_in_odd;
+        else p_ep = g_msd_ep_in_even;
+        
+        Flash_ReadBytes((uint24_t)(addr + g_msd_byte_of_sect), 64, buffer);
+        for(i = 0, x = 0; i < 64; i += 2, x++) p_ep[x] = buffer[i];
+        Flash_ReadBytes((uint24_t)(addr + 32 + g_msd_byte_of_sect), 64, buffer);
+        for(i = 0, x = 32; i < 64; i += 2, x++) p_ep[x] = buffer[i];
         
         #else
-        if(MSD_EP_IN_LAST_PPB == ODD) Flash_ReadBytes((uint24_t)(addr + g_msd_byte_of_sect), 64, g_msd_ep_in_odd);
+        #ifdef MSD_LIMITED_RAM
+        if(MSD_EP_IN_LAST_PPB == ODD) Flash_ReadBytes((uint24_t)(addr), 64, g_msd_ep_in_odd);
         else Flash_ReadBytes((uint24_t)(addr + g_msd_byte_of_sect), 64, g_msd_ep_in_even);
+        #else
+        Flash_ReadBytes((uint24_t)addr, 512, g_msd_sect_data);
+        #endif
         #endif
     }
     else
-    {
+    {   
+        #ifdef MSD_LIMITED_RAM
         if(MSD_EP_IN_LAST_PPB == ODD) usb_ram_set(0, g_msd_ep_in_odd, 64);
         else usb_ram_set(0, g_msd_ep_in_even, 64);
+        #else
+        usb_ram_set(0, g_msd_sect_data, 512);
+        #endif
     }
     #else
     if(addr < END_OF_FLASH)
@@ -562,10 +465,18 @@ void msd_rx_sector(void)
         for(i = 0, x = 32; i < 64; i += 2, x++) g_msd_ep_in[x] = buffer[i];
         
         #else
+        #ifdef MSD_LIMITED_RAM
         Flash_ReadBytes((uint24_t)(addr + g_msd_byte_of_sect), 64, g_msd_ep_in);
+        #else
+        Flash_ReadBytes((uint24_t)addr, 512, g_msd_sect_data);
+        #endif
         #endif
     }
+    #ifdef MSD_LIMITED_RAM
     else usb_ram_set(0, g_msd_ep_in, 64);
+    #else
+    else usb_ram_set(0, g_msd_sect_data, 512);
+    #endif
     #endif
 }
 
@@ -581,31 +492,38 @@ void msd_tx_sector(void)
     {
         #if PINGPONG_MODE == PINGPONG_1_15 || PINGPONG_MODE == PINGPONG_ALL_EP
         #if defined(_PIC14E)
-        // NOT YET SUPPORTED
-//        uint8_t *p_ep;
-//        if(MSD_EP_OUT_LAST_PPB == ODD) p_ep = g_msd_ep_out_odd;
-//        else p_ep = g_msd_ep_out_even;
-//        
-//        for(i = 0, x = 0; i < 64; i += 2, x++)
-//        {
-//            buffer[i] = p_ep[x];
-//            buffer[i + 1] = 0xFF;
-//        }
-//        Flash_EraseWriteBlock((uint24_t)(addr + g_msd_byte_of_sect), buffer);
-//        for(i = 0, x = 32; i < 64; i += 2, x++)
-//        {
-//            buffer[i] = p_ep[x];
-//            buffer[i + 1] = 0xFF;
-//        }
-//        Flash_EraseWriteBlock((uint24_t)(addr + 32 + g_msd_byte_of_sect), buffer);
+        uint8_t *p_ep;
+        if(MSD_EP_OUT_LAST_PPB == ODD) p_ep = g_msd_ep_out_odd;
+        else p_ep = g_msd_ep_out_even;
+        
+        for(i = 0, x = 0; i < 64; i += 2, x++)
+        {
+            buffer[i] = p_ep[x];
+            buffer[i + 1] = 0xFF;
+        }
+        Flash_EraseWriteBlock((uint24_t)(addr + g_msd_byte_of_sect), buffer);
+        for(i = 0, x = 32; i < 64; i += 2, x++)
+        {
+            buffer[i] = p_ep[x];
+            buffer[i + 1] = 0xFF;
+        }
+        Flash_EraseWriteBlock((uint24_t)(addr + 32 + g_msd_byte_of_sect), buffer);
         
         #elif defined(__J_PART)
+        #ifdef MSD_LIMITED_RAM
         if(MSD_EP_OUT_LAST_PPB == ODD) Flash_WriteBlock((uint24_t)(addr + g_msd_byte_of_sect), g_msd_ep_out_odd);
         else Flash_WriteBlock((uint24_t)(addr + g_msd_byte_of_sect), g_msd_ep_out_even);
-        
         #else
+        for(uint16_t i = 0; i < 512; i += 64, addr += 64) Flash_WriteBlock((uint24_t)addr, g_msd_sect_data + i);
+        #endif
+        #else
+
+        #ifdef MSD_LIMITED_RAM
         if(MSD_EP_OUT_LAST_PPB == ODD) Flash_EraseWriteBlock((uint24_t)(addr + g_msd_byte_of_sect), g_msd_ep_out_odd);
         else Flash_EraseWriteBlock((uint24_t)(addr + g_msd_byte_of_sect), g_msd_ep_out_even);
+        #else
+        for(uint16_t i = 0; i < 512; i += _FLASH_ERASE_SIZE, addr += _FLASH_ERASE_SIZE) Flash_EraseWriteBlock((uint24_t)addr, g_msd_sect_data + i);
+        #endif
         #endif
 
         #else
@@ -624,10 +542,18 @@ void msd_tx_sector(void)
         Flash_EraseWriteBlock((uint24_t)(addr + 32 + g_msd_byte_of_sect), buffer);
         
         #elif defined(__J_PART)
+        #ifdef MSD_LIMITED_RAM
         Flash_WriteBlock((uint24_t)(addr + g_msd_byte_of_sect), g_msd_ep_out);
+        #else
+        for(uint16_t i = 0; i < 512; i += 64, addr += 64) Flash_WriteBlock((uint24_t)addr, g_msd_sect_data + i);
+        #endif
         
         #else
+        #ifdef MSD_LIMITED_RAM
         Flash_EraseWriteBlock((uint24_t)(addr + g_msd_byte_of_sect), g_msd_ep_out);
+        #else
+        for(uint16_t i = 0; i < 512; i += _FLASH_ERASE_SIZE, addr += _FLASH_ERASE_SIZE) Flash_EraseWriteBlock((uint24_t)addr, g_msd_sect_data + i);
+        #endif
         #endif
         #endif
     }

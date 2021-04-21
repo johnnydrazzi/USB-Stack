@@ -147,7 +147,7 @@
         <property key="display-overall-usage" value="true"/>
         <property key="display-psect-usage" value="false"/>
         <property key="extra-lib-directories" value=""/>
-        <property key="fill-flash-options-addr" value="0x2000:0x7fff"/>
+        <property key="fill-flash-options-addr" value="0x2000:0x3FFF"/>
         <property key="fill-flash-options-const" value="0"/>
         <property key="fill-flash-options-how" value="1"/>
         <property key="fill-flash-options-inc-const" value="1"/>
@@ -327,7 +327,7 @@
         <property key="display-overall-usage" value="true"/>
         <property key="display-psect-usage" value="false"/>
         <property key="extra-lib-directories" value=""/>
-        <property key="fill-flash-options-addr" value="0x2000:0x7fff"/>
+        <property key="fill-flash-options-addr" value="0x2000:0x3FFF"/>
         <property key="fill-flash-options-const" value="0"/>
         <property key="fill-flash-options-how" value="1"/>
         <property key="fill-flash-options-inc-const" value="1"/>

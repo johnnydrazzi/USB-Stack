@@ -57,17 +57,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=../Shared_Files/flash.c ../Shared_Files/USB.c ../Shared_Files/usb_app.c ../Shared_Files/usb_msd.c main.c
+SOURCEFILES_QUOTED_IF_SPACED=../../../../USB/USB.c ../../../../USB/usb_msd.c ../Shared_Files/flash.c ../Shared_Files/usb_app.c ../Shared_Files/usb_descriptors.c ../Shared_Files/usb_scsi_inq.c ../Shared_Files/main.c
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/_ext/1662128652/flash.p1 ${OBJECTDIR}/_ext/1662128652/USB.p1 ${OBJECTDIR}/_ext/1662128652/usb_app.p1 ${OBJECTDIR}/_ext/1662128652/usb_msd.p1 ${OBJECTDIR}/main.p1
-POSSIBLE_DEPFILES=${OBJECTDIR}/_ext/1662128652/flash.p1.d ${OBJECTDIR}/_ext/1662128652/USB.p1.d ${OBJECTDIR}/_ext/1662128652/usb_app.p1.d ${OBJECTDIR}/_ext/1662128652/usb_msd.p1.d ${OBJECTDIR}/main.p1.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/_ext/671494620/USB.p1 ${OBJECTDIR}/_ext/671494620/usb_msd.p1 ${OBJECTDIR}/_ext/1662128652/flash.p1 ${OBJECTDIR}/_ext/1662128652/usb_app.p1 ${OBJECTDIR}/_ext/1662128652/usb_descriptors.p1 ${OBJECTDIR}/_ext/1662128652/usb_scsi_inq.p1 ${OBJECTDIR}/_ext/1662128652/main.p1
+POSSIBLE_DEPFILES=${OBJECTDIR}/_ext/671494620/USB.p1.d ${OBJECTDIR}/_ext/671494620/usb_msd.p1.d ${OBJECTDIR}/_ext/1662128652/flash.p1.d ${OBJECTDIR}/_ext/1662128652/usb_app.p1.d ${OBJECTDIR}/_ext/1662128652/usb_descriptors.p1.d ${OBJECTDIR}/_ext/1662128652/usb_scsi_inq.p1.d ${OBJECTDIR}/_ext/1662128652/main.p1.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/_ext/1662128652/flash.p1 ${OBJECTDIR}/_ext/1662128652/USB.p1 ${OBJECTDIR}/_ext/1662128652/usb_app.p1 ${OBJECTDIR}/_ext/1662128652/usb_msd.p1 ${OBJECTDIR}/main.p1
+OBJECTFILES=${OBJECTDIR}/_ext/671494620/USB.p1 ${OBJECTDIR}/_ext/671494620/usb_msd.p1 ${OBJECTDIR}/_ext/1662128652/flash.p1 ${OBJECTDIR}/_ext/1662128652/usb_app.p1 ${OBJECTDIR}/_ext/1662128652/usb_descriptors.p1 ${OBJECTDIR}/_ext/1662128652/usb_scsi_inq.p1 ${OBJECTDIR}/_ext/1662128652/main.p1
 
 # Source Files
-SOURCEFILES=../Shared_Files/flash.c ../Shared_Files/USB.c ../Shared_Files/usb_app.c ../Shared_Files/usb_msd.c main.c
+SOURCEFILES=../../../../USB/USB.c ../../../../USB/usb_msd.c ../Shared_Files/flash.c ../Shared_Files/usb_app.c ../Shared_Files/usb_descriptors.c ../Shared_Files/usb_scsi_inq.c ../Shared_Files/main.c
 
 
 
@@ -94,86 +94,118 @@ MP_PROCESSOR_OPTION=18F26J53
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: compile
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
+${OBJECTDIR}/_ext/671494620/USB.p1: ../../../../USB/USB.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/_ext/671494620" 
+	@${RM} ${OBJECTDIR}/_ext/671494620/USB.p1.d 
+	@${RM} ${OBJECTDIR}/_ext/671494620/USB.p1 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c  -D__DEBUG=1   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-1FFF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0xFBFF  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     -o ${OBJECTDIR}/_ext/671494620/USB.p1 ../../../../USB/USB.c 
+	@-${MV} ${OBJECTDIR}/_ext/671494620/USB.d ${OBJECTDIR}/_ext/671494620/USB.p1.d 
+	@${FIXDEPS} ${OBJECTDIR}/_ext/671494620/USB.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
+	
+${OBJECTDIR}/_ext/671494620/usb_msd.p1: ../../../../USB/usb_msd.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/_ext/671494620" 
+	@${RM} ${OBJECTDIR}/_ext/671494620/usb_msd.p1.d 
+	@${RM} ${OBJECTDIR}/_ext/671494620/usb_msd.p1 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c  -D__DEBUG=1   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-1FFF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0xFBFF  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     -o ${OBJECTDIR}/_ext/671494620/usb_msd.p1 ../../../../USB/usb_msd.c 
+	@-${MV} ${OBJECTDIR}/_ext/671494620/usb_msd.d ${OBJECTDIR}/_ext/671494620/usb_msd.p1.d 
+	@${FIXDEPS} ${OBJECTDIR}/_ext/671494620/usb_msd.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
+	
 ${OBJECTDIR}/_ext/1662128652/flash.p1: ../Shared_Files/flash.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/_ext/1662128652" 
 	@${RM} ${OBJECTDIR}/_ext/1662128652/flash.p1.d 
 	@${RM} ${OBJECTDIR}/_ext/1662128652/flash.p1 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c  -D__DEBUG=1   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-27FF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0x7fff  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     -o ${OBJECTDIR}/_ext/1662128652/flash.p1 ../Shared_Files/flash.c 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c  -D__DEBUG=1   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-1FFF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0xFBFF  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     -o ${OBJECTDIR}/_ext/1662128652/flash.p1 ../Shared_Files/flash.c 
 	@-${MV} ${OBJECTDIR}/_ext/1662128652/flash.d ${OBJECTDIR}/_ext/1662128652/flash.p1.d 
 	@${FIXDEPS} ${OBJECTDIR}/_ext/1662128652/flash.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
-	
-${OBJECTDIR}/_ext/1662128652/USB.p1: ../Shared_Files/USB.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/_ext/1662128652" 
-	@${RM} ${OBJECTDIR}/_ext/1662128652/USB.p1.d 
-	@${RM} ${OBJECTDIR}/_ext/1662128652/USB.p1 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c  -D__DEBUG=1   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-27FF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0x7fff  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     -o ${OBJECTDIR}/_ext/1662128652/USB.p1 ../Shared_Files/USB.c 
-	@-${MV} ${OBJECTDIR}/_ext/1662128652/USB.d ${OBJECTDIR}/_ext/1662128652/USB.p1.d 
-	@${FIXDEPS} ${OBJECTDIR}/_ext/1662128652/USB.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
 	
 ${OBJECTDIR}/_ext/1662128652/usb_app.p1: ../Shared_Files/usb_app.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/_ext/1662128652" 
 	@${RM} ${OBJECTDIR}/_ext/1662128652/usb_app.p1.d 
 	@${RM} ${OBJECTDIR}/_ext/1662128652/usb_app.p1 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c  -D__DEBUG=1   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-27FF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0x7fff  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     -o ${OBJECTDIR}/_ext/1662128652/usb_app.p1 ../Shared_Files/usb_app.c 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c  -D__DEBUG=1   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-1FFF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0xFBFF  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     -o ${OBJECTDIR}/_ext/1662128652/usb_app.p1 ../Shared_Files/usb_app.c 
 	@-${MV} ${OBJECTDIR}/_ext/1662128652/usb_app.d ${OBJECTDIR}/_ext/1662128652/usb_app.p1.d 
 	@${FIXDEPS} ${OBJECTDIR}/_ext/1662128652/usb_app.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
 	
-${OBJECTDIR}/_ext/1662128652/usb_msd.p1: ../Shared_Files/usb_msd.c  nbproject/Makefile-${CND_CONF}.mk
+${OBJECTDIR}/_ext/1662128652/usb_descriptors.p1: ../Shared_Files/usb_descriptors.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/_ext/1662128652" 
-	@${RM} ${OBJECTDIR}/_ext/1662128652/usb_msd.p1.d 
-	@${RM} ${OBJECTDIR}/_ext/1662128652/usb_msd.p1 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c  -D__DEBUG=1   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-27FF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0x7fff  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     -o ${OBJECTDIR}/_ext/1662128652/usb_msd.p1 ../Shared_Files/usb_msd.c 
-	@-${MV} ${OBJECTDIR}/_ext/1662128652/usb_msd.d ${OBJECTDIR}/_ext/1662128652/usb_msd.p1.d 
-	@${FIXDEPS} ${OBJECTDIR}/_ext/1662128652/usb_msd.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
+	@${RM} ${OBJECTDIR}/_ext/1662128652/usb_descriptors.p1.d 
+	@${RM} ${OBJECTDIR}/_ext/1662128652/usb_descriptors.p1 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c  -D__DEBUG=1   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-1FFF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0xFBFF  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     -o ${OBJECTDIR}/_ext/1662128652/usb_descriptors.p1 ../Shared_Files/usb_descriptors.c 
+	@-${MV} ${OBJECTDIR}/_ext/1662128652/usb_descriptors.d ${OBJECTDIR}/_ext/1662128652/usb_descriptors.p1.d 
+	@${FIXDEPS} ${OBJECTDIR}/_ext/1662128652/usb_descriptors.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
 	
-${OBJECTDIR}/main.p1: main.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/main.p1.d 
-	@${RM} ${OBJECTDIR}/main.p1 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c  -D__DEBUG=1   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-27FF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0x7fff  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     -o ${OBJECTDIR}/main.p1 main.c 
-	@-${MV} ${OBJECTDIR}/main.d ${OBJECTDIR}/main.p1.d 
-	@${FIXDEPS} ${OBJECTDIR}/main.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
+${OBJECTDIR}/_ext/1662128652/usb_scsi_inq.p1: ../Shared_Files/usb_scsi_inq.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/_ext/1662128652" 
+	@${RM} ${OBJECTDIR}/_ext/1662128652/usb_scsi_inq.p1.d 
+	@${RM} ${OBJECTDIR}/_ext/1662128652/usb_scsi_inq.p1 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c  -D__DEBUG=1   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-1FFF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0xFBFF  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     -o ${OBJECTDIR}/_ext/1662128652/usb_scsi_inq.p1 ../Shared_Files/usb_scsi_inq.c 
+	@-${MV} ${OBJECTDIR}/_ext/1662128652/usb_scsi_inq.d ${OBJECTDIR}/_ext/1662128652/usb_scsi_inq.p1.d 
+	@${FIXDEPS} ${OBJECTDIR}/_ext/1662128652/usb_scsi_inq.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
+	
+${OBJECTDIR}/_ext/1662128652/main.p1: ../Shared_Files/main.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/_ext/1662128652" 
+	@${RM} ${OBJECTDIR}/_ext/1662128652/main.p1.d 
+	@${RM} ${OBJECTDIR}/_ext/1662128652/main.p1 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c  -D__DEBUG=1   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-1FFF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0xFBFF  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     -o ${OBJECTDIR}/_ext/1662128652/main.p1 ../Shared_Files/main.c 
+	@-${MV} ${OBJECTDIR}/_ext/1662128652/main.d ${OBJECTDIR}/_ext/1662128652/main.p1.d 
+	@${FIXDEPS} ${OBJECTDIR}/_ext/1662128652/main.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
 	
 else
+${OBJECTDIR}/_ext/671494620/USB.p1: ../../../../USB/USB.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/_ext/671494620" 
+	@${RM} ${OBJECTDIR}/_ext/671494620/USB.p1.d 
+	@${RM} ${OBJECTDIR}/_ext/671494620/USB.p1 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-1FFF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0xFBFF  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     -o ${OBJECTDIR}/_ext/671494620/USB.p1 ../../../../USB/USB.c 
+	@-${MV} ${OBJECTDIR}/_ext/671494620/USB.d ${OBJECTDIR}/_ext/671494620/USB.p1.d 
+	@${FIXDEPS} ${OBJECTDIR}/_ext/671494620/USB.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
+	
+${OBJECTDIR}/_ext/671494620/usb_msd.p1: ../../../../USB/usb_msd.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/_ext/671494620" 
+	@${RM} ${OBJECTDIR}/_ext/671494620/usb_msd.p1.d 
+	@${RM} ${OBJECTDIR}/_ext/671494620/usb_msd.p1 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-1FFF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0xFBFF  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     -o ${OBJECTDIR}/_ext/671494620/usb_msd.p1 ../../../../USB/usb_msd.c 
+	@-${MV} ${OBJECTDIR}/_ext/671494620/usb_msd.d ${OBJECTDIR}/_ext/671494620/usb_msd.p1.d 
+	@${FIXDEPS} ${OBJECTDIR}/_ext/671494620/usb_msd.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
+	
 ${OBJECTDIR}/_ext/1662128652/flash.p1: ../Shared_Files/flash.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/_ext/1662128652" 
 	@${RM} ${OBJECTDIR}/_ext/1662128652/flash.p1.d 
 	@${RM} ${OBJECTDIR}/_ext/1662128652/flash.p1 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-27FF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0x7fff  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     -o ${OBJECTDIR}/_ext/1662128652/flash.p1 ../Shared_Files/flash.c 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-1FFF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0xFBFF  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     -o ${OBJECTDIR}/_ext/1662128652/flash.p1 ../Shared_Files/flash.c 
 	@-${MV} ${OBJECTDIR}/_ext/1662128652/flash.d ${OBJECTDIR}/_ext/1662128652/flash.p1.d 
 	@${FIXDEPS} ${OBJECTDIR}/_ext/1662128652/flash.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
-	
-${OBJECTDIR}/_ext/1662128652/USB.p1: ../Shared_Files/USB.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/_ext/1662128652" 
-	@${RM} ${OBJECTDIR}/_ext/1662128652/USB.p1.d 
-	@${RM} ${OBJECTDIR}/_ext/1662128652/USB.p1 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-27FF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0x7fff  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     -o ${OBJECTDIR}/_ext/1662128652/USB.p1 ../Shared_Files/USB.c 
-	@-${MV} ${OBJECTDIR}/_ext/1662128652/USB.d ${OBJECTDIR}/_ext/1662128652/USB.p1.d 
-	@${FIXDEPS} ${OBJECTDIR}/_ext/1662128652/USB.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
 	
 ${OBJECTDIR}/_ext/1662128652/usb_app.p1: ../Shared_Files/usb_app.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/_ext/1662128652" 
 	@${RM} ${OBJECTDIR}/_ext/1662128652/usb_app.p1.d 
 	@${RM} ${OBJECTDIR}/_ext/1662128652/usb_app.p1 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-27FF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0x7fff  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     -o ${OBJECTDIR}/_ext/1662128652/usb_app.p1 ../Shared_Files/usb_app.c 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-1FFF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0xFBFF  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     -o ${OBJECTDIR}/_ext/1662128652/usb_app.p1 ../Shared_Files/usb_app.c 
 	@-${MV} ${OBJECTDIR}/_ext/1662128652/usb_app.d ${OBJECTDIR}/_ext/1662128652/usb_app.p1.d 
 	@${FIXDEPS} ${OBJECTDIR}/_ext/1662128652/usb_app.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
 	
-${OBJECTDIR}/_ext/1662128652/usb_msd.p1: ../Shared_Files/usb_msd.c  nbproject/Makefile-${CND_CONF}.mk
+${OBJECTDIR}/_ext/1662128652/usb_descriptors.p1: ../Shared_Files/usb_descriptors.c  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}/_ext/1662128652" 
-	@${RM} ${OBJECTDIR}/_ext/1662128652/usb_msd.p1.d 
-	@${RM} ${OBJECTDIR}/_ext/1662128652/usb_msd.p1 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-27FF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0x7fff  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     -o ${OBJECTDIR}/_ext/1662128652/usb_msd.p1 ../Shared_Files/usb_msd.c 
-	@-${MV} ${OBJECTDIR}/_ext/1662128652/usb_msd.d ${OBJECTDIR}/_ext/1662128652/usb_msd.p1.d 
-	@${FIXDEPS} ${OBJECTDIR}/_ext/1662128652/usb_msd.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
+	@${RM} ${OBJECTDIR}/_ext/1662128652/usb_descriptors.p1.d 
+	@${RM} ${OBJECTDIR}/_ext/1662128652/usb_descriptors.p1 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-1FFF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0xFBFF  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     -o ${OBJECTDIR}/_ext/1662128652/usb_descriptors.p1 ../Shared_Files/usb_descriptors.c 
+	@-${MV} ${OBJECTDIR}/_ext/1662128652/usb_descriptors.d ${OBJECTDIR}/_ext/1662128652/usb_descriptors.p1.d 
+	@${FIXDEPS} ${OBJECTDIR}/_ext/1662128652/usb_descriptors.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
 	
-${OBJECTDIR}/main.p1: main.c  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}" 
-	@${RM} ${OBJECTDIR}/main.p1.d 
-	@${RM} ${OBJECTDIR}/main.p1 
-	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-27FF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0x7fff  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     -o ${OBJECTDIR}/main.p1 main.c 
-	@-${MV} ${OBJECTDIR}/main.d ${OBJECTDIR}/main.p1.d 
-	@${FIXDEPS} ${OBJECTDIR}/main.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
+${OBJECTDIR}/_ext/1662128652/usb_scsi_inq.p1: ../Shared_Files/usb_scsi_inq.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/_ext/1662128652" 
+	@${RM} ${OBJECTDIR}/_ext/1662128652/usb_scsi_inq.p1.d 
+	@${RM} ${OBJECTDIR}/_ext/1662128652/usb_scsi_inq.p1 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-1FFF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0xFBFF  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     -o ${OBJECTDIR}/_ext/1662128652/usb_scsi_inq.p1 ../Shared_Files/usb_scsi_inq.c 
+	@-${MV} ${OBJECTDIR}/_ext/1662128652/usb_scsi_inq.d ${OBJECTDIR}/_ext/1662128652/usb_scsi_inq.p1.d 
+	@${FIXDEPS} ${OBJECTDIR}/_ext/1662128652/usb_scsi_inq.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
+	
+${OBJECTDIR}/_ext/1662128652/main.p1: ../Shared_Files/main.c  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}/_ext/1662128652" 
+	@${RM} ${OBJECTDIR}/_ext/1662128652/main.p1.d 
+	@${RM} ${OBJECTDIR}/_ext/1662128652/main.p1 
+	${MP_CC} $(MP_EXTRA_CC_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -c   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-1FFF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0xFBFF  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits $(COMPARISON_BUILD)  -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     -o ${OBJECTDIR}/_ext/1662128652/main.p1 ../Shared_Files/main.c 
+	@-${MV} ${OBJECTDIR}/_ext/1662128652/main.d ${OBJECTDIR}/_ext/1662128652/main.p1.d 
+	@${FIXDEPS} ${OBJECTDIR}/_ext/1662128652/main.p1.d $(SILENT) -rsi ${MP_CC_DIR}../  
 	
 endif
 
@@ -194,13 +226,13 @@ endif
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
 dist/${CND_CONF}/${IMAGE_TYPE}/PIC18FX6J53.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk    
 	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
-	${MP_CC} $(MP_EXTRA_LD_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -Wl,-Map=dist/${CND_CONF}/${IMAGE_TYPE}/PIC18FX6J53.X.${IMAGE_TYPE}.map  -D__DEBUG=1  -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -Wl,--defsym=__MPLAB_BUILD=1   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-27FF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0x7fff  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto        $(COMPARISON_BUILD) -Wl,--memorysummary,dist/${CND_CONF}/${IMAGE_TYPE}/memoryfile.xml -o dist/${CND_CONF}/${IMAGE_TYPE}/PIC18FX6J53.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}     
+	${MP_CC} $(MP_EXTRA_LD_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -Wl,-Map=dist/${CND_CONF}/${IMAGE_TYPE}/PIC18FX6J53.X.${IMAGE_TYPE}.map  -D__DEBUG=1  -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -Wl,--defsym=__MPLAB_BUILD=1   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-1FFF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0xFBFF  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto        $(COMPARISON_BUILD) -Wl,--memorysummary,dist/${CND_CONF}/${IMAGE_TYPE}/memoryfile.xml -o dist/${CND_CONF}/${IMAGE_TYPE}/PIC18FX6J53.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}     
 	@${RM} dist/${CND_CONF}/${IMAGE_TYPE}/PIC18FX6J53.X.${IMAGE_TYPE}.hex 
 	
 else
 dist/${CND_CONF}/${IMAGE_TYPE}/PIC18FX6J53.X.${IMAGE_TYPE}.${OUTPUT_SUFFIX}: ${OBJECTFILES}  nbproject/Makefile-${CND_CONF}.mk   
 	@${MKDIR} dist/${CND_CONF}/${IMAGE_TYPE} 
-	${MP_CC} $(MP_EXTRA_LD_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -Wl,-Map=dist/${CND_CONF}/${IMAGE_TYPE}/PIC18FX6J53.X.${IMAGE_TYPE}.map  -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -Wl,--defsym=__MPLAB_BUILD=1   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-27FF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0x7fff  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     $(COMPARISON_BUILD) -Wl,--memorysummary,dist/${CND_CONF}/${IMAGE_TYPE}/memoryfile.xml -o dist/${CND_CONF}/${IMAGE_TYPE}/PIC18FX6J53.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}     
+	${MP_CC} $(MP_EXTRA_LD_PRE) -mcpu=$(MP_PROCESSOR_OPTION) -Wl,-Map=dist/${CND_CONF}/${IMAGE_TYPE}/PIC18FX6J53.X.${IMAGE_TYPE}.map  -DXPRJ_PIC18F26J53_FREE=$(CND_CONF)  -Wl,--defsym=__MPLAB_BUILD=1   -mdfp="${DFP_DIR}/xc8"  -fno-short-double -fno-short-float -memi=wordwrite -mrom=0-1FFF -O1 -fasmfile -maddrqual=ignore -xassembler-with-cpp -mwarn=-3 -Wa,-a -msummary=-psect,-class,+mem,-hex,-file --fill=0@0x2000:0xFBFF  -ginhx032 -Wl,--data-init -mno-keep-startup -mno-download -mdefault-config-bits -std=c99 -gdwarf-3 -mstack=compiled:auto:auto:auto     $(COMPARISON_BUILD) -Wl,--memorysummary,dist/${CND_CONF}/${IMAGE_TYPE}/memoryfile.xml -o dist/${CND_CONF}/${IMAGE_TYPE}/PIC18FX6J53.X.${IMAGE_TYPE}.${DEBUGGABLE_SUFFIX}  ${OBJECTFILES_QUOTED_IF_SPACED}     
 	
 endif
 
