@@ -27,7 +27,7 @@ A PIC16 and PIC18 Device USB Stack. Supports all pingpong buffering types. Suppo
 - PIC18F47J53
 
 **Files you modify to suit your project:**
-- config.c
+- config.h
 - main.c
 - usb_config.h
 - usb_app.c
@@ -43,7 +43,8 @@ A PIC16 and PIC18 Device USB Stack. Supports all pingpong buffering types. Suppo
 1. Choose an example to open.
 2. Uncomment the chosen example in usb_config.h (will configure usb and class config files for the chosen example).
 3. Select your target microcontroller from the configurations dropdown list.
-4. Add bootloader settings to project (optional)(see in main.c file for instructions).
+4. Select your development board from the config.h file.
+5. Add bootloader settings to project (optional)(see in main.c file for instructions).
 
 For more information visit the [Project Page](https://hackaday.io/project/165152-pic16-pic18-usb-stack) on Hackaday.io.
 

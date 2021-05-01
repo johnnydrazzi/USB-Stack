@@ -30,7 +30,7 @@
 
 #define CDC_EXAMPLE
 //#define HID_CUSTOM_EXAMPLE
-//#define HID_KEYBOARD_EXAMPLE // Also RubberDucky Example
+//#define HID_KEYBOARD_EXAMPLE
 //#define HID_MOUSE_EXAMPLE
 //#define MSD_INTERNAL_EXAMPLE
 //#define MSD_SIMPLE_EXAMPLE
