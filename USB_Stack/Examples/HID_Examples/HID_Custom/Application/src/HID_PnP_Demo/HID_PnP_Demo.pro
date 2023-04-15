@@ -2,13 +2,14 @@
 # Project created by QtCreator 2010-10-28T17:06:16
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui \
+         widgets
 
 TARGET = HID_PnP_Demo
 TEMPLATE = app
 
 
-SOURCES += main.cpp\
+SOURCES += main.cpp \
         demoapp.cpp \
         hid_pnp.cpp
 

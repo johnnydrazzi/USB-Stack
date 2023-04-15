@@ -12,17 +12,17 @@
 
 #include <QtCore/QVariant>
 #include <QtGui/QAction>
-#include <QtGui/QApplication>
-#include <QtGui/QButtonGroup>
-#include <QtGui/QHeaderView>
-#include <QtGui/QLabel>
-#include <QtGui/QLineEdit>
-#include <QtGui/QMainWindow>
-#include <QtGui/QMenuBar>
-#include <QtGui/QProgressBar>
-#include <QtGui/QPushButton>
-#include <QtGui/QStatusBar>
-#include <QtGui/QWidget>
+#include <QApplication>
+#include <QButtonGroup>
+#include <QHeaderView>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMainWindow>
+#include <QMenuBar>
+#include <QProgressBar>
+#include <QPushButton>
+#include <QStatusBar>
+#include <QWidget>
 
 QT_BEGIN_NAMESPACE
 
@@ -96,12 +96,12 @@ public:
 
     void retranslateUi(QMainWindow *DemoApp)
     {
-        DemoApp->setWindowTitle(QApplication::translate("DemoApp", "DemoApp", 0, QApplication::UnicodeUTF8));
-        pushButton->setText(QApplication::translate("DemoApp", "ToggleLED(s)", 0, QApplication::UnicodeUTF8));
-        pushbuttonStatus->setText(QApplication::translate("DemoApp", "Pushbutton State: Unknown", 0, QApplication::UnicodeUTF8));
-        label_2->setText(QApplication::translate("DemoApp", "ANx/POT Voltage", 0, QApplication::UnicodeUTF8));
-        label_3->setText(QApplication::translate("DemoApp", "Status", 0, QApplication::UnicodeUTF8));
-        deviceConnectedStatus->setText(QApplication::translate("DemoApp", "Device Not Detected: Verify Connection/Correct Firmware", 0, QApplication::UnicodeUTF8));
+        DemoApp->setWindowTitle(QApplication::translate("DemoApp", "DemoApp", 0));
+        pushButton->setText(QApplication::translate("DemoApp", "ToggleLED(s)", 0));
+        pushbuttonStatus->setText(QApplication::translate("DemoApp", "Pushbutton State: Unknown", 0));
+        label_2->setText(QApplication::translate("DemoApp", "ANx/POT Voltage", 0));
+        label_3->setText(QApplication::translate("DemoApp", "Status", 0));
+        deviceConnectedStatus->setText(QApplication::translate("DemoApp", "Device Not Detected: Verify Connection/Correct Firmware", 0));
     } // retranslateUi
 
 };

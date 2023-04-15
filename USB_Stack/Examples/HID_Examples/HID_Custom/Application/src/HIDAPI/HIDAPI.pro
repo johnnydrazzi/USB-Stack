@@ -15,6 +15,17 @@ unix: !macx:  SOURCES += linux/hid-libusb.c
 win32: SOURCES += windows/hid.c
 
 # -------------------------------------------------
+# Add appropriate header files depending on OS
+# -------------------------------------------------
+macx:  HEADERS += mac/hidapi_darwin.h
+unix: !macx:  HEADERS += linux/hidapi_libusb.h
+win32: HEADERS += windows/hidapi_cfgmgr32.h \
+               windows/hidapi_hidclass.h \
+               windows/hidapi_hidpi.h \
+               windows/hidapi_hidsdi.h \
+               windows/hidapi_winapi.h
+
+# -------------------------------------------------
 # Make sure output directory for object file and
 # library is in the correct subdirectory
 # -------------------------------------------------
