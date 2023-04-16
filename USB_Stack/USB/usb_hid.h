@@ -2,10 +2,10 @@
  * @file usb_hid.h
  * @brief <i>Human Interface Device Class</i> settings, structures, global variable and function declarations.
  * @author John Izzard
- * @date 05/06/2020
+ * @date 16/04/2023
  * 
  * USB uC - HID Library (For Keyboard Examples).
- * Copyright (C) 2017-2020  John Izzard
+ * Copyright (C) 2017-2023  John Izzard
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -312,8 +312,10 @@ void hid_service_sof(void);
  * 
  * @brief Function to run in main, so you can respond to reception of 
  * OUT Reports.
+ * 
+ * @param report_num Report number received.
  */
-void hid_out(void);
+void hid_out(uint8_t report_num);
 
 /* ************************************************************************** */
 

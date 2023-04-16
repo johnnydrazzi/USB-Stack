@@ -2,10 +2,10 @@
  * @file main.c
  * @brief Main C file.
  * @author John Izzard
- * @date 29/04/2021
+ * @date 16/04/2023
  * 
  * HID Custom Example.
- * Copyright (C) 2017-2021  John Izzard
+ * Copyright (C) 2017-2023  John Izzard
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -299,7 +299,7 @@ static void flash_led(void)
     }
 }
 
-void hid_out(void)
+void hid_out(uint8_t report_num)
 {
     m_out_event = true;
 }

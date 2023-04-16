@@ -2,10 +2,10 @@
  * @file usb_hid.c
  * @brief Contains <i>Human Interface Device Class</i> functions.
  * @author John Izzard
- * @date 05/06/2020
+ * @date 16/04/2023
  * 
  * USB uC - HID Library.
- * Copyright (C) 2017-2020  John Izzard
+ * Copyright (C) 2017-2023  John Izzard
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -379,7 +379,7 @@ void hid_tasks(void)
     }
     else
     {
-        #if HID_NUM_OUT_REPORTS != 0
+        #if HID_NUM_OUT_REPORTS == 1
         #if PINGPONG_MODE == PINGPONG_1_15 || PINGPONG_MODE == PINGPONG_ALL_EP
         HID_EP_OUT_LAST_PPB = PINGPONG_PARITY;
         #endif
@@ -389,16 +389,42 @@ void hid_tasks(void)
         if(HID_EP_OUT_LAST_PPB == ODD)
         {
             usb_ram_copy((uint8_t*)HID_EP_OUT_ODD_BUFFER_BASE_ADDR, (uint8_t*)g_hid_out_reports[0], g_hid_out_report_size[0]);
-            hid_out();
+            hid_out(0);
         }
         else
         {
             usb_ram_copy((uint8_t*)HID_EP_OUT_EVEN_BUFFER_BASE_ADDR, (uint8_t*)g_hid_out_reports[0], g_hid_out_report_size[0]);
-            hid_out();
+            hid_out(0);
         }
         #else
         usb_ram_copy((uint8_t*)HID_EP_OUT_BUFFER_BASE_ADDR, (uint8_t*)g_hid_out_reports[0], g_hid_out_report_size[0]);
-        hid_out();
+        hid_out(0);
+        #endif
+        #elif HID_NUM_OUT_REPORTS > 1
+        uint8_t report_num;
+        
+        #if PINGPONG_MODE == PINGPONG_1_15 || PINGPONG_MODE == PINGPONG_ALL_EP
+        HID_EP_OUT_LAST_PPB = PINGPONG_PARITY;
+        #endif
+        HID_EP_OUT_DATA_TOGGLE_VAL ^= 1;
+        
+        #if PINGPONG_MODE == PINGPONG_1_15 || PINGPONG_MODE == PINGPONG_ALL_EP
+        if(HID_EP_OUT_LAST_PPB == ODD)
+        {
+            report_num = *(uint8_t*)HID_EP_OUT_ODD_BUFFER_BASE_ADDR;
+            usb_ram_copy((uint8_t*)HID_EP_OUT_ODD_BUFFER_BASE_ADDR, (uint8_t*)g_hid_out_reports[report_num], g_hid_out_report_size[report_num]);
+            hid_out(report_num);
+        }
+        else
+        {
+            report_num = *(uint8_t*)HID_EP_OUT_EVEN_BUFFER_BASE_ADDR;
+            usb_ram_copy((uint8_t*)HID_EP_OUT_EVEN_BUFFER_BASE_ADDR, (uint8_t*)g_hid_out_reports[report_num], g_hid_out_report_size[report_num]);
+            hid_out(report_num);
+        }
+        #else
+        report_num = *(uint8_t*)HID_EP_OUT_BUFFER_BASE_ADDR;
+        usb_ram_copy((uint8_t*)HID_EP_OUT_BUFFER_BASE_ADDR, (uint8_t*)g_hid_out_reports[report_num], g_hid_out_report_size[report_num]);
+        hid_out(report_num);
         #endif
         #endif
     }
