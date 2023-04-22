@@ -2,10 +2,10 @@
  * @file main.c
  * @brief Main C file.
  * @author John Izzard
- * @date 29/04/2021
+ * @date 22/04/2023
  * 
  * MSD Internal Example.
- * Copyright (C) 2017-2021  John Izzard
+ * Copyright (C) 2017-2023  John Izzard
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,6 +61,101 @@
 #define FAT_REST_OF_START     0x1204
 #define ROOT_ENTRY_START      0x1400
 
+#elif defined(_18F2450) || defined(_18F4450)
+/* PIC18FX450 ROM Space
+             ______________
+    0x00000 |____RESET_____|
+    0x00008 |____INT_HP____|
+    0x00018 |____INT_LP____| 0x2000 (8KB)
+            |              |
+            |     CODE     |
+    0x01FFF |______________|
+    0x02000 |              |
+            |  PROG MEM    | 0x2000 (8KB)
+    0x03FFF |______________|
+   0x300000 |              |
+            | CONFIG WORDS | 0x0E
+   0x30000D |______________|
+ */
+ 
+#define FLASH_SPACE_START     0x02000 // Put ROM range as 0-1FFF
+#define END_OF_FLASH          0x04000
+
+#define BOOT_START            FLASH_SPACE_START
+#define BOOT_SIZE             62
+#define BOOTSTRAP_START       (FLASH_SPACE_START + BOOT_SIZE)
+#define BOOTSTRAP_SIZE        448
+#define SIGNATURE_WORD_START  (BOOTSTRAP_START + BOOTSTRAP_SIZE)
+#define SIGNATURE_WORD_SIZE   2
+#define FAT_DEFAULT_START     (SIGNATURE_WORD_START + SIGNATURE_WORD_SIZE)
+#define FAT_DEFAULT_SIZE      4
+#define FAT_REST_OF_START     (FAT_DEFAULT_START + FAT_DEFAULT_SIZE)
+#define FAT_REST_OF_SIZE      (512 - FAT_DEFAULT_SIZE)
+#define ROOT_ENTRY_START      (FAT_REST_OF_START + FAT_REST_OF_SIZE)
+
+#elif defined(_18F2455) || defined(_18F4455) || defined(_18F2458) || defined(_18F4458)
+/* PIC18FX455 and PIC18FX458 ROM Space
+             ______________
+    0x00000 |____RESET_____|
+    0x00008 |____INT_HP____|
+    0x00018 |____INT_LP____| 0x2000 (8KB)
+            |              |
+            |     CODE     |
+    0x01FFF |______________|
+    0x02000 |              |
+            |  PROG MEM    | 0x4000 (16KB)
+    0x05FFF |______________|
+   0x300000 |              |
+            | CONFIG WORDS | 0x0E
+   0x30000D |______________|
+ */
+ 
+#define FLASH_SPACE_START     0x02000 // Put ROM range as 0-1FFF
+#define END_OF_FLASH          0x06000
+
+#define BOOT_START            FLASH_SPACE_START
+#define BOOT_SIZE             62
+#define BOOTSTRAP_START       (FLASH_SPACE_START + BOOT_SIZE)
+#define BOOTSTRAP_SIZE        448
+#define SIGNATURE_WORD_START  (BOOTSTRAP_START + BOOTSTRAP_SIZE)
+#define SIGNATURE_WORD_SIZE   2
+#define FAT_DEFAULT_START     (SIGNATURE_WORD_START + SIGNATURE_WORD_SIZE)
+#define FAT_DEFAULT_SIZE      4
+#define FAT_REST_OF_START     (FAT_DEFAULT_START + FAT_DEFAULT_SIZE)
+#define FAT_REST_OF_SIZE      (512 - FAT_DEFAULT_SIZE)
+#define ROOT_ENTRY_START      (FAT_REST_OF_START + FAT_REST_OF_SIZE)
+
+#elif defined(_18F2550) || defined(_18F4550) || defined(_18F2553) || defined(_18F4553)
+/* PIC18FX550 and PIC18FX553 ROM Space
+             ______________
+    0x00000 |____RESET_____|
+    0x00008 |____INT_HP____|
+    0x00018 |____INT_LP____| 0x2000 (8KB)
+            |              |
+            |     CODE     |
+    0x01FFF |______________|
+    0x02000 |              |
+            |  PROG MEM    | 0x6000 (24KB)
+    0x07FFF |______________|
+   0x300000 |              |
+            | CONFIG WORDS | 0x0E
+   0x30000D |______________|
+ */
+ 
+#define FLASH_SPACE_START     0x02000 // Put ROM range as 0-1FFF
+#define END_OF_FLASH          0x08000
+
+#define BOOT_START            FLASH_SPACE_START
+#define BOOT_SIZE             62
+#define BOOTSTRAP_START       (FLASH_SPACE_START + BOOT_SIZE)
+#define BOOTSTRAP_SIZE        448
+#define SIGNATURE_WORD_START  (BOOTSTRAP_START + BOOTSTRAP_SIZE)
+#define SIGNATURE_WORD_SIZE   2
+#define FAT_DEFAULT_START     (SIGNATURE_WORD_START + SIGNATURE_WORD_SIZE)
+#define FAT_DEFAULT_SIZE      4
+#define FAT_REST_OF_START     (FAT_DEFAULT_START + FAT_DEFAULT_SIZE)
+#define FAT_REST_OF_SIZE      (512 - FAT_DEFAULT_SIZE)
+#define ROOT_ENTRY_START      (FAT_REST_OF_START + FAT_REST_OF_SIZE)
 
 #elif defined(_18F14K50)
 /* PIC18F14K50 ROM Space
@@ -93,7 +188,6 @@
 #define FAT_REST_OF_START     (FAT_DEFAULT_START + FAT_DEFAULT_SIZE)
 #define FAT_REST_OF_SIZE      (512 - FAT_DEFAULT_SIZE)
 #define ROOT_ENTRY_START      (FAT_REST_OF_START + FAT_REST_OF_SIZE)
-
 
 #elif defined(_18F24K50)
 /* PIC18F24K50 ROM Space
@@ -161,6 +255,95 @@
 #define FAT_REST_OF_SIZE      (512 - FAT_DEFAULT_SIZE)
 #define ROOT_ENTRY_START      (FAT_REST_OF_START + FAT_REST_OF_SIZE)
 
+#elif defined(_18F24J50) || defined(_18F44J50)
+/* PIC18FX4J50 ROM Space
+             ______________
+    0x00000 |____RESET_____|
+    0x00008 |____INT_HP____|
+    0x00018 |____INT_LP____| 0x2000 (8KB)
+            |              |
+            |     CODE     |
+    0x01FFF |______________|
+    0x02000 |              |
+            |  PROG MEM    | 0x01C00 (7KB)
+    0x03BFF |______________|
+    0x03C00 |              |
+            | CONFIG WORDS | 0x400 (1KB)
+    0x03FFF |______________|
+ */
+
+#define FLASH_SPACE_START     0x02000 // Put ROM range as 0-1FFF
+#define END_OF_FLASH          0x03C00
+
+#define BOOT_START            FLASH_SPACE_START
+#define BOOT_SIZE             62
+#define BOOTSTRAP_START       (FLASH_SPACE_START + BOOT_SIZE)
+#define BOOTSTRAP_SIZE        448
+#define SIGNATURE_WORD_START  (BOOTSTRAP_START + BOOTSTRAP_SIZE)
+#define SIGNATURE_WORD_SIZE   2
+#define FAT_DEFAULT_START     (FLASH_SPACE_START + 1024)
+#define FAT_DEFAULT_SIZE      4
+#define ROOT_ENTRY_START      (FLASH_SPACE_START + 2048)
+
+#elif defined(_18F25J50) || defined(_18F45J50)
+/* PIC18FX5J50 ROM Space
+             ______________
+    0x00000 |____RESET_____|
+    0x00008 |____INT_HP____|
+    0x00018 |____INT_LP____| 0x2000 (8KB)
+            |              |
+            |     CODE     |
+    0x01FFF |______________|
+    0x02000 |              |
+            |  PROG MEM    | 0x05C00 (23KB)
+    0x07BFF |______________|
+    0x07C00 |              |
+            | CONFIG WORDS | 0x400 (1KB)
+    0x07FFF |______________|
+ */
+ 
+#define FLASH_SPACE_START     0x02000 // Put ROM range as 0-1FFF
+#define END_OF_FLASH          0x07C00
+
+#define BOOT_START            FLASH_SPACE_START
+#define BOOT_SIZE             62
+#define BOOTSTRAP_START       (FLASH_SPACE_START + BOOT_SIZE)
+#define BOOTSTRAP_SIZE        448
+#define SIGNATURE_WORD_START  (BOOTSTRAP_START + BOOTSTRAP_SIZE)
+#define SIGNATURE_WORD_SIZE   2
+#define FAT_DEFAULT_START     (FLASH_SPACE_START + 1024)
+#define FAT_DEFAULT_SIZE      4
+#define ROOT_ENTRY_START      (FLASH_SPACE_START + 2048)
+
+#elif defined(_18F26J50) || defined(_18F46J50)
+/* PIC18FX6J50 ROM Space
+             ______________
+    0x00000 |____RESET_____|
+    0x00008 |____INT_HP____|
+    0x00018 |____INT_LP____| 0x2000 (8KB)
+            |              |
+            |     CODE     |
+    0x01FFF |______________|
+    0x02000 |              |
+            |  PROG MEM    | 0x0DC00 (55KB)
+    0x0FBFF |______________|
+    0x0FC00 |              |
+            | CONFIG WORDS | 0x400 (1KB)
+    0x0FFFF |______________|
+ */
+ 
+#define FLASH_SPACE_START     0x02000 // Put ROM range as 0-1FFF
+#define END_OF_FLASH          0x0FC00
+
+#define BOOT_START            FLASH_SPACE_START
+#define BOOT_SIZE             62
+#define BOOTSTRAP_START       (FLASH_SPACE_START + BOOT_SIZE)
+#define BOOTSTRAP_SIZE        448
+#define SIGNATURE_WORD_START  (BOOTSTRAP_START + BOOTSTRAP_SIZE)
+#define SIGNATURE_WORD_SIZE   2
+#define FAT_DEFAULT_START     (FLASH_SPACE_START + 1024)
+#define FAT_DEFAULT_SIZE      4
+#define ROOT_ENTRY_START      (FLASH_SPACE_START + 2048)
 
 #elif defined(_18F26J53) || defined(_18F46J53)
 /* PIC18FX6J53 ROM Space
@@ -376,6 +559,10 @@ static void example_init(void)
     ACTCONbits.ACTEN = 1;
     #endif
 
+    // PIC18FX450, PIC18FX550, and PIC18FX455.
+    #elif defined(_18F4450_FAMILY_) || defined(_18F4550_FAMILY_)
+    PLL_STARTUP_DELAY();
+    
     // PIC18F14K50.
     #elif defined(_18F13K50) || defined(_18F14K50)
     OSCTUNEbits.SPLLEN = 1;
@@ -410,7 +597,7 @@ static void example_init(void)
     BUTTON_ANCON |= (1<<BUTTON_ANCON_BIT);
     #endif
 
-    
+
     // Apply pull-up.
     #ifdef BUTTON_WPU
     #if defined(_PIC14E)
@@ -420,6 +607,16 @@ static void example_init(void)
     #endif
     BUTTON_WPU |= (1 << BUTTON_WPU_BIT);
     OPTION_REGbits.nWPUEN = 0;
+    
+    #elif defined(_18F4450_FAMILY_) || defined(_18F4550_FAMILY_)
+    LATB = 0;
+    LATD = 0;
+    BUTTON_WPU |= (1 << BUTTON_WPU_BIT);
+    #if BUTTON_RXPU_REG == INTCON2
+    INTCON2 &= 7F;
+    #else
+    PORTE |= 80;
+    #endif
     
     #elif defined(_18F13K50) || defined(_18F14K50)
     WPUA = 0;
@@ -433,12 +630,12 @@ static void example_init(void)
     BUTTON_WPU |= (1 << BUTTON_WPU_BIT);
     INTCON2bits.nRBPU = 0;
     
-    #elif defined(_18F26J53) || defined(_18F27J53)
+    #elif defined(_18F24J50) || defined(_18F25J50) || defined(_18F26J50) || defined(_18F26J53) || defined(_18F27J53)
     LATB = 0;
     BUTTON_WPU |= (1 << BUTTON_WPU_BIT);
     BUTTON_RXPU_REG &= ~(1 << BUTTON_RXPU_BIT);
     
-    #elif defined(_18F46J53) || defined(_18F47J53)
+    #elif defined(_18F44J50) || defined(_18F45J50) || defined(_18F46J50) || defined(_18F46J53) || defined(_18F47J53)
     LATB = 0;
     LATD = 0;
     LATE = 0;

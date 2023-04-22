@@ -2,7 +2,7 @@
  * @file main.c
  * @brief Main C file.
  * @author John Izzard
- * @date 16/04/2023
+ * @date 22/04/2023
  * 
  * HID Keyboard + Consumer Example.
  * Copyright (C) 2017-2023  John Izzard
@@ -37,8 +37,11 @@
  * isn't placed in the same Flash Page as the Config Words. That area is write 
  * protected.
  * 
- * PIC18FX6J53: 2000-FBFF.
- * PIC18FX7J53: 2000-1FBFF.
+ * PIC18FX4J50: 2000-03BFF
+ * PIC18FX5J50: 2000-07BFF
+ * PIC18FX6J50: 2000-0FBFF
+ * PIC18FX6J53: 2000-0FBFF
+ * PIC18FX7J53: 2000-1FBFF
  * 
  * 2. DOWNLOAD FROM MPLABX
  * You can get MPLABX to download your code every time you press build. 
@@ -179,6 +182,10 @@ static void example_init(void)
     ACTCONbits.ACTEN = 1;
     #endif
 
+    // PIC18FX450, PIC18FX550, and PIC18FX455.
+    #elif defined(_18F4450_FAMILY_) || defined(_18F4550_FAMILY_)
+    PLL_STARTUP_DELAY();
+    
     // PIC18F14K50.
     #elif defined(_18F13K50) || defined(_18F14K50)
     OSCTUNEbits.SPLLEN = 1;
@@ -213,7 +220,7 @@ static void example_init(void)
     BUTTON_ANCON |= (1<<BUTTON_ANCON_BIT);
     #endif
 
-    
+
     // Apply pull-up.
     #ifdef BUTTON_WPU
     #if defined(_PIC14E)
@@ -223,6 +230,16 @@ static void example_init(void)
     #endif
     BUTTON_WPU |= (1 << BUTTON_WPU_BIT);
     OPTION_REGbits.nWPUEN = 0;
+    
+    #elif defined(_18F4450_FAMILY_) || defined(_18F4550_FAMILY_)
+    LATB = 0;
+    LATD = 0;
+    BUTTON_WPU |= (1 << BUTTON_WPU_BIT);
+    #if BUTTON_RXPU_REG == INTCON2
+    INTCON2 &= 7F;
+    #else
+    PORTE |= 80;
+    #endif
     
     #elif defined(_18F13K50) || defined(_18F14K50)
     WPUA = 0;
@@ -236,12 +253,12 @@ static void example_init(void)
     BUTTON_WPU |= (1 << BUTTON_WPU_BIT);
     INTCON2bits.nRBPU = 0;
     
-    #elif defined(_18F26J53) || defined(_18F27J53)
+    #elif defined(_18F24J50) || defined(_18F25J50) || defined(_18F26J50) || defined(_18F26J53) || defined(_18F27J53)
     LATB = 0;
     BUTTON_WPU |= (1 << BUTTON_WPU_BIT);
     BUTTON_RXPU_REG &= ~(1 << BUTTON_RXPU_BIT);
     
-    #elif defined(_18F46J53) || defined(_18F47J53)
+    #elif defined(_18F44J50) || defined(_18F45J50) || defined(_18F46J50) || defined(_18F46J53) || defined(_18F47J53)
     LATB = 0;
     LATD = 0;
     LATE = 0;
