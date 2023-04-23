@@ -2,10 +2,10 @@
  * @file usb_msd_config.h
  * @brief <i>Mass Storage Class</i> user settings.
  * @author John Izzard
- * @date 05/06/2020
+ * @date 23/04/2023
  * 
  * USB uC - MSD Library.
- * Copyright (C) 2017-2020  John Izzard
+ * Copyright (C) 2017-2023  John Izzard
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -89,60 +89,20 @@
 #endif
 #if defined(_PIC14E)
 #define VOL_CAPACITY_IN_BYTES  0x1000UL // 4KB
-#define VOL_CAPACITY_IN_BLOCKS 0x8 // 8
-
-#define LAST_BLOCK_LE 0x7 // 7 (VOL_CAPACITY_IN_BLOCKS - 1)
-#define LAST_BLOCK_BE 0x07000000UL // Big-endian version
-
-#elif defined(_18F14K50) || defined(_18F24K50)
-#if _HTC_EDITION_ == 0
-#define VOL_CAPACITY_IN_BYTES  0x5800UL // 6KB
-#define VOL_CAPACITY_IN_BLOCKS 0x0C // 12
-
-#define LAST_BLOCK_LE 0x0B // 11 (VOL_CAPACITY_IN_BLOCKS - 1)
-#define LAST_BLOCK_BE 0x0B000000UL // Big-endian version
+#elif defined(__J_PART)
+#define VOL_CAPACITY_IN_BYTES (_ROMSIZE - 0x2000 - 0x3F8) // Don't include last block.
 #else
-#define VOL_CAPACITY_IN_BYTES  0x6000UL // 8KB
-#define VOL_CAPACITY_IN_BLOCKS 0x10 // 16
-
-#define LAST_BLOCK_LE 0x0F // 15 (VOL_CAPACITY_IN_BLOCKS - 1)
-#define LAST_BLOCK_BE 0x0F000000UL // Big-endian version
+#define VOL_CAPACITY_IN_BYTES (_ROMSIZE - 0x2000) // Code is expected to compile <8KB, offset is 0x2000.
 #endif
-
-#elif defined(_18F25K50) || defined(_18F45K50)
-#if _HTC_EDITION_ == 0
-#define VOL_CAPACITY_IN_BYTES  0x5800UL // 22KB
-#define VOL_CAPACITY_IN_BLOCKS 0x2C // 44
-
-#define LAST_BLOCK_LE 0x2B // 43 (VOL_CAPACITY_IN_BLOCKS - 1)
-#define LAST_BLOCK_BE 0x2B000000UL // Big-endian version
-#else
-#define VOL_CAPACITY_IN_BYTES  0x6000UL // 24KB
-#define VOL_CAPACITY_IN_BLOCKS 0x30 // 48
-
-#define LAST_BLOCK_LE 0x2F // 47 (VOL_CAPACITY_IN_BLOCKS - 1)
-#define LAST_BLOCK_BE 0x2F000000UL // Big-endian version
-#endif
-#elif defined(_18F27J53) || defined(_18F47J53)
-#define VOL_CAPACITY_IN_BYTES  0x01DC00UL // 119KB
-#define VOL_CAPACITY_IN_BLOCKS 0x77 // 119
-
-#define LAST_BLOCK_LE 0x76 // 117 (VOL_CAPACITY_IN_BLOCKS - 1)
-#define LAST_BLOCK_BE 0x76000000UL // Big-endian version
-
-#elif defined(_18F26J53) || defined(_18F46J53)
-#define VOL_CAPACITY_IN_BYTES  0x00DC00UL // 55KB
-#define VOL_CAPACITY_IN_BLOCKS 0x37 // 55
-
-#define LAST_BLOCK_LE 0x36 // 54 (VOL_CAPACITY_IN_BLOCKS - 1)
-#define LAST_BLOCK_BE 0x36000000UL // Big-endian version
-#endif
+#define VOL_CAPACITY_IN_BLOCKS (VOL_CAPACITY_IN_BYTES / BYTES_PER_BLOCK_LE)
+#define LAST_BLOCK_LE (VOL_CAPACITY_IN_BLOCKS - 1)
+#define LAST_BLOCK_BE (LAST_BLOCK_LE << 24) // This conversion method is fine unless number of blocks is greater than 255.
 
 // MSD Endpoint HAL
 #define MSD_EP EP1
 #define MSD_EP_SIZE EP1_SIZE
 
-// MSD Buffer Decriptor HAL
+// MSD Buffer Descriptor HAL
 #define MSD_BD_OUT         BD1_OUT
 #define MSD_BD_OUT_EVEN    BD1_OUT_EVEN
 #define MSD_BD_OUT_ODD     BD1_OUT_ODD
