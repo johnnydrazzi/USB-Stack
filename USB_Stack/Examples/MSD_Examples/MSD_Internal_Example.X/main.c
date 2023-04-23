@@ -29,6 +29,10 @@
 #include "../../../USB/usb_msd.h"
 #include "flash.h"
 
+#if _HTC_EDITION_ == 0
+#error "Use optimization level 2 and above."
+#endif
+
 #if defined(_PIC14E)
 /* PIC16F145X ROM Space
              ______________
@@ -36,7 +40,7 @@
     0x00008 |____INT_HP____|
     0x00018 |____INT_LP____| 0x2000 (8KB)
             |              |
-            | BOOT LOADER  |
+            |     CODE     |
     0x01FFF |______________|
     0x02000 |              |
             |  PROG MEM    | 0x2000 (8KB) *Only 4KB usable due to 14-bit size words
@@ -46,11 +50,8 @@
     0x1000D |______________|
  */
 
-#if _HTC_EDITION_ == 0
-#error "Don't even bother trying to do this in Free Mode!"
-#else                  // Standard/Pro Version - put ROM range as 0-1FFF
-#define FLASH_SPACE_START     0x01000
-#endif
+                
+#define FLASH_SPACE_START     0x01000 // Put ROM range as 0-7FF,800-FFF
 #define END_OF_FLASH          0x02000
 
 #define BOOT_START            (FLASH_SPACE_START)
@@ -509,14 +510,20 @@ static const DIR_ENTRY_t dir_entry __at(ROOT_ENTRY_START) =
 };
 
 static void example_init(void);
+#ifdef USE_BOOT_LED
 static void flash_led(void);
+#endif
 static uint32_t LBA_to_flash_addr(uint32_t LBA);
 static void __interrupt() isr(void);
 
 void main(void)
 {
     example_init();
+    #ifdef USE_BOOT_LED
+	LED_OFF();
+    LED_OUPUT();
     flash_led();
+	#endif
     
     usb_init();
     INTCONbits.PEIE = 1;
@@ -643,11 +650,9 @@ static void example_init(void)
     BUTTON_RXPU_REG &= ~(1 << BUTTON_RXPU_BIT);
     #endif
     #endif
-    
-    LED_OFF();
-    LED_OUPUT();
 }
 
+#ifdef USE_BOOT_LED
 static void flash_led(void)
 {
     for(uint8_t i = 0; i < 3; i++)
@@ -658,6 +663,7 @@ static void flash_led(void)
         __delay_ms(500);
     }
 }
+#endif
 
 void msd_rx_sector(void)
 {
