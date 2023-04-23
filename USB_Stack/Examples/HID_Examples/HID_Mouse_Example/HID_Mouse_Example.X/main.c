@@ -96,7 +96,9 @@
 #define BUTTON_WAS_RELEASED (BUTTON_RELEASED && !m_released)
 
 static void example_init(void);
+#ifdef USE_BOOT_LED
 static void flash_led(void);
+#endif
 static void __interrupt() isr(void);
 static void service_reports_to_send(void);
 
@@ -106,7 +108,11 @@ static bool m_send_report = false;
 void main(void)
 {
     example_init();
+    #ifdef USE_BOOT_LED
+	LED_OFF();
+    LED_OUPUT();
     flash_led();
+	#endif
     
     // Comment out the following for polling method.
     usb_init();
@@ -262,11 +268,9 @@ static void example_init(void)
     BUTTON_RXPU_REG &= ~(1 << BUTTON_RXPU_BIT);
     #endif
     #endif
-    
-    LED_OFF();
-    LED_OUPUT();
 }
 
+#ifdef USE_BOOT_LED
 static void flash_led(void)
 {
     for(uint8_t i = 0; i < 3; i++)
@@ -277,6 +281,7 @@ static void flash_led(void)
         __delay_ms(500);
     }
 }
+#endif
 
 static void service_reports_to_send(void)
 {

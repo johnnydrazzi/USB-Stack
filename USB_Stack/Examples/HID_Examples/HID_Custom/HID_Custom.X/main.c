@@ -101,7 +101,9 @@ typedef enum
 }hid_custom_example_commands_t;
 
 static void example_init(void);
+#ifdef USE_BOOT_LED
 static void flash_led(void);
+#endif
 static void __interrupt() isr(void);
 
 static bool m_out_event = false;
@@ -136,7 +138,11 @@ void main(void)
     ADCON0bits.ADON = 1;
     #endif
 
+    #ifdef USE_BOOT_LED
+	LED_OFF();
+    LED_OUPUT();
     flash_led();
+	#endif
     
     usb_init();
     INTCONbits.PEIE = 1;
@@ -152,7 +158,9 @@ void main(void)
             switch(g_hid_out_report1.array[0])
             {
                 case COMMAND_TOGGLE_LED:
+				    #ifdef USE_BOOT_LED
                     LED_LAT ^= (1 << LED_BIT);
+					#endif
                     break;
                 case COMMAND_GET_BUTTON_STATUS:
                     if(g_hid_report_sent == true)
@@ -300,11 +308,9 @@ static void example_init(void)
     BUTTON_RXPU_REG &= ~(1 << BUTTON_RXPU_BIT);
     #endif
     #endif
-    
-    LED_OFF();
-    LED_OUPUT();
 }
 
+#ifdef USE_BOOT_LED
 static void flash_led(void)
 {
     for(uint8_t i = 0; i < 3; i++)
@@ -315,6 +321,7 @@ static void flash_led(void)
         __delay_ms(500);
     }
 }
+#endif
 
 void hid_out(uint8_t report_num)
 {

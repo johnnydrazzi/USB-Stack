@@ -93,7 +93,9 @@
 #include "../../../USB/usb_cdc.h"
 
 static void example_init(void);
+#ifdef USE_BOOT_LED
 static void flash_led(void);
+#endif
 static void __interrupt() isr(void);
 static void serial_print_string(char* string);
 static void serial_echo(void);
@@ -104,7 +106,11 @@ static bool volatile m_serial_pkt_rcv = false;
 void main(void)
 {
     example_init();
+    #ifdef USE_BOOT_LED
+    LED_OFF();
+    LED_OUPUT();
     flash_led();
+    #endif
     
     usb_init();
     INTCONbits.PEIE = 1;
@@ -239,11 +245,9 @@ static void example_init(void)
     BUTTON_RXPU_REG &= ~(1 << BUTTON_RXPU_BIT);
     #endif
     #endif
-    
-    LED_OFF();
-    LED_OUPUT();
 }
 
+#ifdef USE_BOOT_LED
 static void flash_led(void)
 {
     for(uint8_t i = 0; i < 3; i++)
@@ -254,6 +258,7 @@ static void flash_led(void)
         __delay_ms(500);
     }
 }
+#endif
 
 void cdc_set_control_line_state(void)
 {

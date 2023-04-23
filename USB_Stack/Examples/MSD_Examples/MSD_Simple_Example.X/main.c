@@ -223,13 +223,19 @@ static const ROOT_DIR_t root =
 };
 
 static void example_init(void);
+#ifdef USE_BOOT_LED
 static void flash_led(void);
+#endif
 static void __interrupt() isr(void);
 
 void main(void)
 {
     example_init();
+	#ifdef USE_BOOT_LED
+	LED_OFF();
+    LED_OUPUT();
     flash_led();
+	#endif
     
     usb_init();
     INTCONbits.PEIE = 1;
@@ -357,11 +363,9 @@ static void example_init(void)
     BUTTON_RXPU_REG &= ~(1 << BUTTON_RXPU_BIT);
     #endif
     #endif
-    
-    LED_OFF();
-    LED_OUPUT();
 }
 
+#ifdef USE_BOOT_LED
 static void flash_led(void)
 {
     for(uint8_t i = 0; i < 3; i++)
@@ -372,6 +376,7 @@ static void flash_led(void)
         __delay_ms(500);
     }
 }
+#endif
 
 void msd_rx_sector(void)
 {

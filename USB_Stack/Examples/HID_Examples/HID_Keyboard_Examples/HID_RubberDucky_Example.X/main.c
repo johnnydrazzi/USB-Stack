@@ -98,7 +98,9 @@
 #endif
 
 static void example_init(void);
+#ifdef USE_BOOT_LED
 static void flash_led(void);
+#endif
 static void __interrupt() isr(void);
 static void send_key(uint8_t modifier, uint8_t key_code);
 static void send_consumer(uint8_t consumer_val);
@@ -109,7 +111,11 @@ static const uint8_t message[] = "https://youtu.be/dQw4w9WgXcQ?t=43s\r";
 void main(void)
 {
     example_init();
+    #ifdef USE_BOOT_LED
+	LED_OFF();
+    LED_OUPUT();
     flash_led();
+	#endif
     
     usb_init();
     INTCONbits.PEIE = 1;
@@ -234,11 +240,9 @@ static void example_init(void)
     BUTTON_RXPU_REG &= ~(1 << BUTTON_RXPU_BIT);
     #endif
     #endif
-    
-    LED_OFF();
-    LED_OUPUT();
 }
 
+#ifdef USE_BOOT_LED
 static void flash_led(void)
 {
     for(uint8_t i = 0; i < 3; i++)
@@ -249,6 +253,7 @@ static void flash_led(void)
         __delay_ms(500);
     }
 }
+#endif
 
 static void send_key(uint8_t modifier, uint8_t key_code)
 {
@@ -290,8 +295,10 @@ void USB_ServiceAppOut(void)
 
 void hid_out(uint8_t report_num)
 {
+    #ifdef USE_BOOT_LED
     if(g_hid_out_report1.CAPS_LOCK) LED_ON();
     else LED_OFF();
+    #endif
     #if PINGPONG_MODE == PINGPONG_1_15 || PINGPONG_MODE == PINGPONG_ALL_EP
     if(HID_EP_OUT_LAST_PPB == ODD) hid_arm_ep_out(HID_BD_OUT_EVEN);
     else hid_arm_ep_out(HID_BD_OUT_ODD);
