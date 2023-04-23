@@ -200,8 +200,8 @@
 //#define LED_ACTIVE_LOW    // Uncomment to make the Bootloader LED active low.
 #endif
 
-// PIC18F14K50 Settings:
-#elif defined(_18F14K50)
+// PIC18F13K50 & PIC18F14K50 Settings:
+#elif defined(_18F13K50) || defined(_18F14K50)
 #define DM164127  0 // Compatible with DM164127-2/DV164139-2 https://www.microchip.com/developmenttools/ProductDetails/PartNO/DM164127-2
 #define GENERAL   1 // Compatible with dev boards that have a reset button.
 #define DEV_BOARD 2 // A custom dev board I use.
