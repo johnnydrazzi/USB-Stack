@@ -14,7 +14,7 @@ The USB stack has been compliance tested using USB-IF's USB 3 Command Verifier (
 - MSD Internal
 - MSD Simple
 
-**Currently supports:**
+**Currently supports:**<br>
 PIC16F1459 Family:
 - PIC16F1454
 - PIC16F1455
