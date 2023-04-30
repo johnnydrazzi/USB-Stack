@@ -2,10 +2,10 @@
  * @file usb.h
  * @brief Contains definitions used by the core USB stack and declaration of global functions and variables.
  * @author John Izzard
- * @date 24/02/2021
+ * @date 30/04/2023
  * 
  * USB uC - USB Stack.
- * Copyright (C) 2017-2021  John Izzard
+ * Copyright (C) 2017-2023  John Izzard
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -369,7 +369,7 @@ uint8_t usb_get_configurationn(void);
 void usb_set_control_stage(uint8_t control_stage);
 
 /**
- * @fn void usb_arm_endpoint(bd_t* p_bd, usb_ep_stat_t* p_ep_stat, uint16_t buffer_addr, uint16_t cnt)
+ * @fn void usb_arm_endpoint(bd_t* p_bd, usb_ep_stat_t* p_ep_stat, uint16_t buffer_addr, uint8_t cnt)
  * 
  * @brief Arms any OUT/IN Endpoint for a transaction.
  * 
@@ -387,7 +387,7 @@ void usb_set_control_stage(uint8_t control_stage);
  * @endcode
  * </li></ul>
  */
-void usb_arm_endpoint(bd_t* p_bd, usb_ep_stat_t* p_ep_stat, uint16_t buffer_addr, uint16_t cnt);
+void usb_arm_endpoint(bd_t* p_bd, usb_ep_stat_t* p_ep_stat, uint16_t buffer_addr, uint8_t cnt);
 
 
 #if PINGPONG_MODE == PINGPONG_ALL_EP

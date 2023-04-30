@@ -2,7 +2,7 @@
  * @file usb_cdc.h
  * @brief <i>Communications Device Class</i> core header file.
  * @author John Izzard
- * @date 24/02/2021
+ * @date 30/04/2023
  * 
  * USB uC - CDC Library.
  * Copyright (C) 2017-2021  John Izzard
@@ -577,7 +577,7 @@ void cdc_arm_com_ep_in(void);
 void cdc_arm_data_ep_out(void);
 
 /**
- * @fn void cdc_arm_data_ep_in(uint16_t cnt)
+ * @fn void cdc_arm_data_ep_in(uint8_t cnt)
  * 
  * @brief Arms CDC DAT EP IN Endpoint for a transaction.
  * 
@@ -592,7 +592,7 @@ void cdc_arm_data_ep_out(void);
  * @endcode
  * </li></ul>
  */
-void cdc_arm_data_ep_in(uint16_t cnt);
+void cdc_arm_data_ep_in(uint8_t cnt);
 
 /* ************************************************************************** */
 

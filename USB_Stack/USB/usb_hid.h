@@ -2,7 +2,7 @@
  * @file usb_hid.h
  * @brief <i>Human Interface Device Class</i> settings, structures, global variable and function declarations.
  * @author John Izzard
- * @date 16/04/2023
+ * @date 30/04/2023
  * 
  * USB uC - HID Library (For Keyboard Examples).
  * Copyright (C) 2017-2023  John Izzard
@@ -230,7 +230,7 @@ void hid_clear_ep_toggle(void);
 void hid_arm_ep_out(uint8_t bdt_index);
 
 /**
- * @fn void hid_arm_ep_in(uint8_t bdt_index, uint16_t cnt)
+ * @fn void hid_arm_ep_in(uint8_t bdt_index, uint8_t cnt)
  * 
  * @brief Arms HID EP IN Endpoint for a transaction.
  * 
@@ -246,7 +246,7 @@ void hid_arm_ep_out(uint8_t bdt_index);
  * @endcode
  * </li></ul>
  */
-void hid_arm_ep_in(uint8_t bdt_index, uint16_t cnt);
+void hid_arm_ep_in(uint8_t bdt_index, uint8_t cnt);
 #else
 
 /**
@@ -267,7 +267,7 @@ void hid_arm_ep_in(uint8_t bdt_index, uint16_t cnt);
 void hid_arm_ep_out(void);
 
 /**
- * @fn void hid_arm_ep_in(uint16_t cnt)
+ * @fn void hid_arm_ep_in(uint8_t cnt)
  * 
  * @brief Arms HID EP IN Endpoint for a transaction.
  * 
@@ -282,7 +282,7 @@ void hid_arm_ep_out(void);
  * @endcode
  * </li></ul>
  */
-void hid_arm_ep_in(uint16_t cnt);
+void hid_arm_ep_in(uint8_t cnt);
 #endif
 
 /* ************************************************************************** */

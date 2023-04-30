@@ -2,10 +2,10 @@
  * @file usb_cdc_acm.c
  * @brief <i>Communications Device Class</i> core.
  * @author John Izzard
- * @date 05/06/2020
+ * @date 30/04/2023
  * 
  * USB uC - CDC Library.
- * Copyright (C) 2017-2020  John Izzard
+ * Copyright (C) 2017-2023  John Izzard
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -86,7 +86,7 @@ void cdc_arm_data_ep_out(void)
 }
 
 
-void cdc_arm_data_ep_in(uint16_t cnt)
+void cdc_arm_data_ep_in(uint8_t cnt)
 {
     if(CDC_DAT_EP_IN_DATA_TOGGLE_VAL) g_usb_bd_table[CDC_DAT_BD_IN].STAT = _DTSEN | _DTS; // DATA1
     else g_usb_bd_table[CDC_DAT_BD_IN].STAT = _DTSEN; // DATA0

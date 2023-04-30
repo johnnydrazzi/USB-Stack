@@ -2,7 +2,7 @@
  * @file usb_hid.c
  * @brief Contains <i>Human Interface Device Class</i> functions.
  * @author John Izzard
- * @date 16/04/2023
+ * @date 30/04/2023
  * 
  * USB uC - HID Library.
  * Copyright (C) 2017-2023  John Izzard
@@ -220,7 +220,7 @@ void hid_arm_ep_out(uint8_t bdt_index)
 }
 
 
-void hid_arm_ep_in(uint8_t bdt_index, uint16_t cnt)
+void hid_arm_ep_in(uint8_t bdt_index, uint8_t cnt)
 {
     if(g_usb_ep_stat[HID_EP][IN].Data_Toggle_Val) g_usb_bd_table[bdt_index].STAT = _DTSEN | _DTS; // DATA1
     else g_usb_bd_table[bdt_index].STAT = _DTSEN; // DATA0
@@ -238,7 +238,7 @@ void hid_arm_ep_out(void)
 }
 
 
-void hid_arm_ep_in(uint16_t cnt)
+void hid_arm_ep_in(uint8_t cnt)
 {
     if(g_usb_ep_stat[HID_EP][IN].Data_Toggle_Val) g_usb_bd_table[HID_BD_IN].STAT = _DTSEN | _DTS; // DATA1
     else g_usb_bd_table[HID_BD_IN].STAT = _DTSEN; // DATA0
