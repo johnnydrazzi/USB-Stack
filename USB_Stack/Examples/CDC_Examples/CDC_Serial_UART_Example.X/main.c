@@ -129,7 +129,9 @@ void main(void)
     #if defined(_18F13K50) || defined(_18F14K50)
     ANSELH = 0;
     #elif !defined(__J_PART)
+    #ifdef ANSELC
     ANSELC = 0;
+    #endif
     #endif
     
     usb_init();
