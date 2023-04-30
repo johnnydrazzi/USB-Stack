@@ -130,6 +130,13 @@ void main(void)
     ADCON2bits.ACQT = 0b011;
     ADCON2bits.ADFM = 1;
     ADCON0bits.ADON = 1;
+    #elif defined(_18F4550_FAMILY_) || defined(_18F4450_FAMILY_)
+    ADCON1bits.PCFG = 1; // RA0 analog pin
+    ADCON0bits.CHS = 0; // AN0 (RA0).
+    ADCON2bits.ADCS = 0b110;
+    ADCON2bits.ACQT = 0b011;
+    ADCON2bits.ADFM = 1;
+    ADCON0bits.ADON = 1;
     #elif defined(__J_PART)
     ADCON0bits.CHS = 8; // AN8 (RB2).
     ADCON1bits.ADCS = 0b110;
@@ -177,14 +184,15 @@ void main(void)
                         ADCON0bits.GO_nDONE = 1;
                         while(ADCON0bits.GO_nDONE){}
                         g_hid_in_report1.array[0] = COMMAND_READ_POTENTIOMETER;
-                        #if !defined(__J_PART)
-                        g_hid_in_report1.array[1] = ADRESL;
-                        g_hid_in_report1.array[2] = ADRESH;
-                        #else
+                        #if defined(_18F47J53_FAMILY_) || defined(_18F2458) || \
+                            defined(_18F4458) || defined(_18F2553) || defined(_18F4553)
                         // 12-bit ADC. If not converted to 10-bit number the
                         // application will report an exception.
                         g_hid_in_report1.array[1] = (ADRESH << 6) | (ADRESL >> 2); 
                         g_hid_in_report1.array[2] = ADRESH >> 2;
+                        #else
+                        g_hid_in_report1.array[1] = ADRESL;
+                        g_hid_in_report1.array[2] = ADRESH;
                         #endif
                         #else
                         g_hid_in_report1.array[0] = COMMAND_READ_POTENTIOMETER;
