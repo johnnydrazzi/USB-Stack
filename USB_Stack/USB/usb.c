@@ -192,7 +192,7 @@ static void set_clear_feature_ep0(void);
  * 
  * @brief Handles SET_FEATURE and CLEAR_FEATURE requests related to EPs other than EP0.
  */
-static void set_clear_feature_epn(void)
+static void set_clear_feature_epn(void);
 
 /**
  * @fn void set_address(void)
