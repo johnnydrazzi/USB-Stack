@@ -61,7 +61,7 @@ void usb_app_clear_halt(uint8_t bd_table_index, uint8_t ep, uint8_t dir)
 bool usb_app_set_interface(uint8_t alternate_setting, uint8_t interface)
 {
 #if NUM_ALT_INTERFACES != 0
-    if(g_set_interface.Interface < NUM_INTERFACES) return false;
+    if(g_set_interface.Interface < NUM_INTERFACES) return true;
 #else
     if(alternate_setting == 0 && interface == 0)
     {
@@ -74,7 +74,7 @@ bool usb_app_set_interface(uint8_t alternate_setting, uint8_t interface)
         CDC_DAT_EP_IN_DATA_TOGGLE_VAL = 0;
         return true;
     }
-    else return false;
+    return false;
 #endif
 }
 
@@ -82,7 +82,7 @@ bool usb_app_set_interface(uint8_t alternate_setting, uint8_t interface)
 bool usb_app_get_interface(uint8_t* alternate_setting_result, uint8_t interface)
 {
 #if NUM_ALT_INTERFACES != 0
-    if(g_get_interface.Interface < NUM_INTERFACES) return false;
+    if(g_get_interface.Interface < NUM_INTERFACES) return true;
 #endif
     return false;
 }

@@ -287,58 +287,46 @@ static bool check_for_media(void);
 #if PINGPONG_MODE == PINGPONG_1_15 || PINGPONG_MODE == PINGPONG_ALL_EP
 void msd_arm_ep_out(uint8_t bdt_index)
 {
-    if(g_usb_ep_stat[MSD_EP][OUT].Data_Toggle_Val) g_usb_bd_table[bdt_index].STAT = _DTSEN | _DTS; // DATA1
-    else g_usb_bd_table[bdt_index].STAT = _DTSEN; // DATA0
-    g_usb_bd_table[bdt_index].CNT       = MSD_EP_SIZE;
-    g_usb_bd_table[bdt_index].STAT     |= _UOWN;
+    usb_arm_endpoint(&g_usb_bd_table[bdt_index], &g_usb_ep_stat[MSD_EP][OUT], MSD_EP_SIZE);
 }
 
 void msd_arm_ep_in(uint8_t bdt_index, uint8_t cnt)
 {
-    if(g_usb_ep_stat[MSD_EP][IN].Data_Toggle_Val) g_usb_bd_table[bdt_index].STAT = _DTSEN | _DTS; // DATA1
-    else g_usb_bd_table[bdt_index].STAT = _DTSEN; // DATA0
-    g_usb_bd_table[bdt_index].CNT       = cnt;
-    g_usb_bd_table[bdt_index].STAT     |= _UOWN;
+    usb_arm_endpoint(&g_usb_bd_table[bdt_index], &g_usb_ep_stat[MSD_EP][IN], cnt);
 }
 
 #else
 void msd_arm_ep_out(void)
 {
-    if(g_usb_ep_stat[MSD_EP][OUT].Data_Toggle_Val) g_usb_bd_table[MSD_BD_OUT].STAT = _DTSEN | _DTS; // DATA1
-    else g_usb_bd_table[MSD_BD_OUT].STAT = _DTSEN; // DATA0
-    g_usb_bd_table[MSD_BD_OUT].CNT       = MSD_EP_SIZE;
-    g_usb_bd_table[MSD_BD_OUT].STAT     |= _UOWN;
+    usb_arm_endpoint(&g_usb_bd_table[MSD_BD_OUT], &g_usb_ep_stat[MSD_EP][OUT], MSD_EP_SIZE);
 }
 
 void msd_arm_ep_in(uint8_t cnt)
 {
-    if(g_usb_ep_stat[MSD_EP][IN].Data_Toggle_Val) g_usb_bd_table[MSD_BD_IN].STAT = _DTSEN | _DTS; // DATA1
-    else g_usb_bd_table[MSD_BD_IN].STAT = _DTSEN; // DATA0
-    g_usb_bd_table[MSD_BD_IN].CNT       = cnt;
-    g_usb_bd_table[MSD_BD_IN].STAT     |= _UOWN;
+    usb_arm_endpoint(&g_usb_bd_table[MSD_BD_IN], &g_usb_ep_stat[MSD_EP][IN], cnt);
 }
 #endif
 
 void msd_stall_ep_out(void)
 {
-    #if PINGPONG_MODE == PINGPONG_1_15 || PINGPONG_MODE == PINGPONG_ALL_EP
     g_usb_ep_stat[MSD_EP][OUT].Halt  = 1;
+    
+    #if PINGPONG_MODE == PINGPONG_1_15 || PINGPONG_MODE == PINGPONG_ALL_EP
     usb_stall_ep(&g_usb_bd_table[MSD_BD_OUT_EVEN]);
     usb_stall_ep(&g_usb_bd_table[MSD_BD_OUT_ODD]);
     #else
-    g_usb_ep_stat[MSD_EP][OUT].Halt  = 1;
     usb_stall_ep(&g_usb_bd_table[MSD_BD_OUT]);
     #endif
 }
 
 void msd_stall_ep_in(void)
 {
-    #if PINGPONG_MODE == PINGPONG_1_15 || PINGPONG_MODE == PINGPONG_ALL_EP
     g_usb_ep_stat[MSD_EP][IN].Halt  = 1;
+
+    #if PINGPONG_MODE == PINGPONG_1_15 || PINGPONG_MODE == PINGPONG_ALL_EP
     usb_stall_ep(&g_usb_bd_table[MSD_BD_IN_EVEN]);
     usb_stall_ep(&g_usb_bd_table[MSD_BD_IN_ODD]);
     #else
-    g_usb_ep_stat[MSD_EP][IN].Halt  = 1;
     usb_stall_ep(&g_usb_bd_table[MSD_BD_IN]);
     #endif
 }
@@ -363,13 +351,11 @@ bool msd_class_request(void)
         m_unit_attention = false;
         usb_arm_in_status();
         usb_set_control_stage(STATUS_IN_STAGE);
+        return true;
     }
-    else
-    {
-        // Only supported class request is BOMSR, GET_MAX_LUN is not supported
-        return false;
-    }
-    return true;
+
+    // Only supported class request is BOMSR, GET_MAX_LUN is not supported
+    return false;
 }
 
 
@@ -418,12 +404,11 @@ void msd_init(void)
 
 void msd_add_task(void)
 {
-    if(m_task_cnt < 4)
-    {
-        m_tasks_buff.task[m_task_put_index++] = *((uint8_t*)&g_usb_last_USTAT);
-        if(m_task_put_index == 4) m_task_put_index = 0;
-        m_task_cnt++;
-    }
+    if(m_task_cnt >= 4) return;
+
+    m_tasks_buff.task[m_task_put_index++] = *((uint8_t*)&g_usb_last_USTAT);
+    if(m_task_put_index == 4) m_task_put_index = 0;
+    m_task_cnt++;
 }
 
 
@@ -497,19 +482,18 @@ void msd_tasks(void)
 
 void msd_clear_halt(uint8_t bdt_index, uint8_t ep, uint8_t dir)
 {
-    if(!m_wait_for_bomsr)
+    if(m_wait_for_bomsr) return;
+
+    g_usb_ep_stat[ep][dir].Data_Toggle_Val = 0;
+    if(g_usb_ep_stat[ep][dir].Halt)
     {
-        g_usb_ep_stat[ep][dir].Data_Toggle_Val = 0;
-        if(g_usb_ep_stat[ep][dir].Halt)
-        {
-            g_usb_ep_stat[ep][dir].Halt      = 0;
-            g_usb_bd_table[bdt_index].STAT   = 0;
-            #if PINGPONG_MODE == PINGPONG_1_15 || PINGPONG_MODE == PINGPONG_ALL_EP
-            g_usb_bd_table[++bdt_index].STAT = 0;
-            #endif
-        }
-        m_clear_halt_event = true;
+        g_usb_ep_stat[ep][dir].Halt      = 0;
+        g_usb_bd_table[bdt_index].STAT   = 0;
+        #if PINGPONG_MODE == PINGPONG_1_15 || PINGPONG_MODE == PINGPONG_ALL_EP
+        g_usb_bd_table[++bdt_index].STAT = 0;
+        #endif
     }
+    m_clear_halt_event = true;
 }
 
 
@@ -527,14 +511,8 @@ static void service_cbw(void)
     #if PINGPONG_MODE == PINGPONG_1_15 || PINGPONG_MODE == PINGPONG_ALL_EP
     uint8_t *in_ep_addr;
     
-    if(MSD_EP_IN_LAST_PPB == ODD)
-    {
-        in_ep_addr = g_msd_ep_in_even;
-    }
-    else
-    {
-        in_ep_addr = g_msd_ep_in_odd;
-    }
+    if(MSD_EP_IN_LAST_PPB == ODD) in_ep_addr = g_msd_ep_in_even;
+    else in_ep_addr = g_msd_ep_in_odd;
     
     if(MSD_EP_OUT_LAST_PPB == ODD) usb_ram_copy(g_msd_ep_out_odd, g_msd_cbw.BYTES, 31);
     else usb_ram_copy(g_msd_ep_out_even, g_msd_cbw.BYTES, 31);
@@ -825,14 +803,8 @@ static void service_cbw(void)
             #ifdef USE_READ_CAPACITY
             msd_read_capacity();
             #else
-            if(g_msd_rw_10_vars.START_LBA > LAST_BLOCK_LE)
-            {
-                g_msd_read_capacity_10.RETURNED_LOGICAL_BLOCK_ADDRESS = 0xFFFFFFFFUL;
-            }
-            else
-            {
-                g_msd_read_capacity_10.RETURNED_LOGICAL_BLOCK_ADDRESS = LAST_BLOCK_BE;
-            }
+
+            g_msd_read_capacity_10.RETURNED_LOGICAL_BLOCK_ADDRESS = g_msd_rw_10_vars.START_LBA > LAST_BLOCK_LE ? 0xFFFFFFFFUL : LAST_BLOCK_BE;
             g_msd_read_capacity_10.BLOCK_LENGTH_IN_BYTES = BYTES_PER_BLOCK_BE;
             #endif
             #if PINGPONG_MODE == PINGPONG_1_15 || PINGPONG_MODE == PINGPONG_ALL_EP
@@ -969,14 +941,8 @@ static bool check_13_cases(uint32_t device_bytes, uint8_t dev_expect)
 static bool cbw_valid(void)
 {
     #if PINGPONG_MODE == PINGPONG_1_15 || PINGPONG_MODE == PINGPONG_ALL_EP
-    if(MSD_EP_OUT_LAST_PPB == ODD)
-    {
-        if(g_usb_bd_table[MSD_BD_OUT_ODD].CNT != 31) goto cbw_not_valid;
-    }
-    else
-    {
-        if(g_usb_bd_table[MSD_BD_OUT_EVEN].CNT != 31) goto cbw_not_valid;
-    }
+    if((MSD_EP_OUT_LAST_PPB == ODD) && (g_usb_bd_table[MSD_BD_OUT_ODD].CNT != 31)) goto cbw_not_valid;
+    if((MSD_EP_OUT_LAST_PPB == EVEN) && (g_usb_bd_table[MSD_BD_OUT_EVEN].CNT != 31)) goto cbw_not_valid;
     #else
     if(g_usb_bd_table[MSD_BD_OUT].CNT != 31) goto cbw_not_valid;
     #endif
@@ -1005,14 +971,13 @@ static void fail_command(void)
     {
         g_msd_csw.bCSWStatus = COMMAND_FAILED;
         setup_csw();
+        return;
     }
-    else 
-    {
-        if(g_msd_cbw.Direction) msd_stall_ep_in();  // Hi
-        else                    msd_stall_ep_out(); // Ho
-        g_msd_csw.bCSWStatus = COMMAND_FAILED;
-        m_msd_state = MSD_WAIT_CLEAR;
-    }
+
+    if(g_msd_cbw.Direction) msd_stall_ep_in();  // Hi
+    else                    msd_stall_ep_out(); // Ho
+    g_msd_csw.bCSWStatus = COMMAND_FAILED;
+    m_msd_state = MSD_WAIT_CLEAR;
 }
 
 
@@ -1127,7 +1092,8 @@ static void service_write10(void)
     usb_ram_copy(ep_address, g_msd_sect_data + g_msd_byte_of_sect, MSD_EP_SIZE); // Load EP size worth of data from EP to g_msd_sect_data buffer.
     #endif
     g_msd_byte_of_sect += MSD_EP_SIZE;
-    if(g_msd_byte_of_sect == BYTES_PER_BLOCK_LE){
+    if(g_msd_byte_of_sect == BYTES_PER_BLOCK_LE)
+    {
         #ifndef MSD_LIMITED_RAM
         msd_tx_sector();
         #endif
@@ -1136,7 +1102,7 @@ static void service_write10(void)
     }
 
     g_msd_rw_10_vars.TF_LEN_IN_BYTES -= MSD_EP_SIZE;
-    g_msd_csw.dCSWDataResidue -= MSD_EP_SIZE;
+    g_msd_csw.dCSWDataResidue        -= MSD_EP_SIZE;
     
     if(g_msd_rw_10_vars.TF_LEN_IN_BYTES == 0)
     {
@@ -1149,10 +1115,7 @@ static void service_write10(void)
         }
         else setup_csw();
     }
-    else
-    {
-        msd_arm_ep_out((uint8_t)MSD_BD_OUT_EVEN + MSD_EP_OUT_LAST_PPB);
-    }
+    else msd_arm_ep_out((uint8_t)MSD_BD_OUT_EVEN + MSD_EP_OUT_LAST_PPB);
     
     #else
     #ifdef MSD_LIMITED_RAM

@@ -377,17 +377,16 @@ void usb_set_control_stage(uint8_t control_stage);
  * 
  * @param[in] p_bd Buffer Descriptor pointer.
  * @param[in] p_ep_stat Endpoint status pointer.
- * @param[in] buffer_addr Address of data in RAM to transfer in data stage.
  * @param[in] cnt Amount of data being transfered.
  * 
  * <b>Code Example:</b>
  * <ul style="list-style-type:none"><li>
  * @code
- * usb_arm_endpoint(&g_usb_bd_table[BD1_OUT], &g_usb_ep_stat[EP1][OUT], EP1_OUT_BUFFER_BASE_ADDR, 31);
+ * usb_arm_endpoint(&g_usb_bd_table[BD1_OUT], &g_usb_ep_stat[EP1][OUT], 31);
  * @endcode
  * </li></ul>
  */
-void usb_arm_endpoint(bd_t* p_bd, usb_ep_stat_t* p_ep_stat, uint16_t buffer_addr, uint8_t cnt);
+void usb_arm_endpoint(bd_t* p_bd, usb_ep_stat_t* p_ep_stat, uint8_t cnt);
 
 
 #if PINGPONG_MODE == PINGPONG_ALL_EP

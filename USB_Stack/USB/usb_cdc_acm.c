@@ -70,35 +70,27 @@ bool g_cdc_has_set_rts = false;
 
 void cdc_arm_com_ep_in(void)
 {
-    if(CDC_COM_EP_IN_DATA_TOGGLE_VAL) g_usb_bd_table[CDC_COM_BD_IN].STAT = _DTSEN | _DTS; // DATA1
-    else g_usb_bd_table[CDC_COM_BD_IN].STAT = _DTSEN; // DATA0
-    g_usb_bd_table[CDC_COM_BD_IN].CNT = 10;
-    g_usb_bd_table[CDC_COM_BD_IN].STAT |= _UOWN;
+    usb_arm_endpoint(&g_usb_bd_table[CDC_COM_BD_IN], &g_usb_ep_stat[CDC_COM_EP][IN], 10);
 }
 
 
 void cdc_arm_data_ep_out(void)
 {
-    if(CDC_DAT_EP_OUT_DATA_TOGGLE_VAL) g_usb_bd_table[CDC_DAT_BD_OUT].STAT = _DTSEN | _DTS; // DATA1
-    else g_usb_bd_table[CDC_DAT_BD_OUT].STAT = _DTSEN; // DATA0
-    g_usb_bd_table[CDC_DAT_BD_OUT].CNT = CDC_DAT_EP_SIZE;
-    g_usb_bd_table[CDC_DAT_BD_OUT].STAT |= _UOWN;
+    usb_arm_endpoint(&g_usb_bd_table[CDC_DAT_BD_OUT], &g_usb_ep_stat[CDC_DAT_EP][OUT], CDC_DAT_EP_SIZE);
 }
 
 
 void cdc_arm_data_ep_in(uint8_t cnt)
 {
-    if(CDC_DAT_EP_IN_DATA_TOGGLE_VAL) g_usb_bd_table[CDC_DAT_BD_IN].STAT = _DTSEN | _DTS; // DATA1
-    else g_usb_bd_table[CDC_DAT_BD_IN].STAT = _DTSEN; // DATA0
-    g_usb_bd_table[CDC_DAT_BD_IN].CNT = cnt;
-    g_usb_bd_table[CDC_DAT_BD_IN].STAT |= _UOWN;
+    usb_arm_endpoint(&g_usb_bd_table[CDC_DAT_BD_IN], &g_usb_ep_stat[CDC_DAT_EP][IN], cnt);
 }
 
 bool cdc_class_request(void)
 {
     static uint8_t dummy_buffer[8] = {0};
     
-    switch(g_usb_setup.bRequest){
+    switch(g_usb_setup.bRequest)
+    {
         #ifdef USE_GET_LINE_CODING
         case GET_LINE_CODING:
             g_usb_ram_ptr = (uint8_t*)&g_cdc_get_line_coding_return;
@@ -106,13 +98,12 @@ bool cdc_class_request(void)
             if(g_usb_bytes_available < g_cdc_set_get_line_coding.Size_of_Structure)
             {
                 g_usb_bytes_2_send = g_usb_bytes_available;
-                if(g_cdc_set_get_line_coding.Size_of_Structure % g_usb_bytes_available) g_usb_send_short = true;
-                else g_usb_send_short = false;
+                g_usb_send_short   = g_cdc_set_get_line_coding.Size_of_Structure % g_usb_bytes_available ? true : false;
             }
             else
             {
                 g_usb_bytes_2_send = g_cdc_set_get_line_coding.Size_of_Structure;
-                g_usb_send_short = false;
+                g_usb_send_short   = false;
             }
             g_usb_sending_from = RAM;
             usb_in_control_transfer();
@@ -147,13 +138,12 @@ bool cdc_class_request(void)
             if(g_usb_bytes_available < g_usb_setup.wLength)
             {
                 g_usb_bytes_2_send = g_usb_bytes_available;
-                if(g_usb_setup.wLength % g_usb_bytes_available) g_usb_send_short = true;
-                else g_usb_send_short = false;
+                g_usb_send_short   = g_usb_setup.wLength % g_usb_bytes_available ? true : false;
             }
             else
             {
                 g_usb_bytes_2_send = g_usb_setup.wLength;
-                g_usb_send_short = false;
+                g_usb_send_short   = false;
             }
             g_usb_sending_from = RAM;
             usb_in_control_transfer();

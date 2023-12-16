@@ -213,63 +213,52 @@ static bool set_idle(void);
 #if PINGPONG_MODE == PINGPONG_1_15 || PINGPONG_MODE == PINGPONG_ALL_EP
 void hid_arm_ep_out(uint8_t bdt_index)
 {
-    if(g_usb_ep_stat[HID_EP][OUT].Data_Toggle_Val) g_usb_bd_table[bdt_index].STAT = _DTSEN | _DTS; // DATA1
-    else g_usb_bd_table[bdt_index].STAT = _DTSEN; // DATA0
-    g_usb_bd_table[bdt_index].CNT   = HID_EP_SIZE;
-    g_usb_bd_table[bdt_index].STAT |= _UOWN;
+    usb_arm_endpoint(&g_usb_bd_table[bdt_index], &g_usb_ep_stat[HID_EP][OUT], HID_EP_SIZE);
 }
 
 
 void hid_arm_ep_in(uint8_t bdt_index, uint8_t cnt)
 {
-    if(g_usb_ep_stat[HID_EP][IN].Data_Toggle_Val) g_usb_bd_table[bdt_index].STAT = _DTSEN | _DTS; // DATA1
-    else g_usb_bd_table[bdt_index].STAT = _DTSEN; // DATA0
-    g_usb_bd_table[bdt_index].CNT   = cnt;
-    g_usb_bd_table[bdt_index].STAT |= _UOWN;
+    usb_arm_endpoint(&g_usb_bd_table[bdt_index], &g_usb_ep_stat[HID_EP][IN], cnt);
 }
 
 #else
 void hid_arm_ep_out(void)
 {
-    if(g_usb_ep_stat[HID_EP][OUT].Data_Toggle_Val) g_usb_bd_table[HID_BD_OUT].STAT = _DTSEN | _DTS; // DATA1
-    else g_usb_bd_table[HID_BD_OUT].STAT = _DTSEN; // DATA0
-    g_usb_bd_table[HID_BD_OUT].CNT   = HID_EP_SIZE;
-    g_usb_bd_table[HID_BD_OUT].STAT |= _UOWN;
+    usb_arm_endpoint(&g_usb_bd_table[HID_BD_OUT], &g_usb_ep_stat[HID_EP][OUT], HID_EP_SIZE);
 }
 
 
 void hid_arm_ep_in(uint8_t cnt)
 {
-    if(g_usb_ep_stat[HID_EP][IN].Data_Toggle_Val) g_usb_bd_table[HID_BD_IN].STAT = _DTSEN | _DTS; // DATA1
-    else g_usb_bd_table[HID_BD_IN].STAT = _DTSEN; // DATA0
-    g_usb_bd_table[HID_BD_IN].CNT   = cnt;
-    g_usb_bd_table[HID_BD_IN].STAT |= _UOWN;
+    usb_arm_endpoint(&g_usb_bd_table[HID_BD_IN], &g_usb_ep_stat[HID_EP][IN], cnt);
 }
 #endif
 
 bool hid_class_request(void)
 {
-    switch(g_usb_setup.bRequest){
+    switch(g_usb_setup.bRequest)
+    {
         case GET_REPORT:
             return get_report();
         #ifdef USE_SET_REPORT
         case SET_REPORT:
-        #endif /* SET_REPORT */
+        #endif
             return set_report();
         #ifdef USE_GET_IDLE
         case GET_IDLE:
             return get_idle();
-        #endif /* USE_GET_IDLE */
+        #endif
         #ifdef USE_SET_IDLE
         case SET_IDLE:
             return set_idle();
-        #endif /* USE_SET_IDLE */
+        #endif
         #ifdef USE_GET_PROTOCOL
         case GET_PROTOCOL:
-        #endif /* USE_GET_PROTOCOL */
+        #endif
         #ifdef USE_SET_PROTOCOL
         case SET_PROTOCOL:
-        #endif /* USE_SET_PROTOCOL */
+        #endif
         default:
             return false;
     }
@@ -409,18 +398,13 @@ void hid_tasks(void)
         HID_EP_OUT_DATA_TOGGLE_VAL ^= 1;
         
         #if PINGPONG_MODE == PINGPONG_1_15 || PINGPONG_MODE == PINGPONG_ALL_EP
-        if(HID_EP_OUT_LAST_PPB == ODD)
-        {
-            report_num = *(uint8_t*)HID_EP_OUT_ODD_BUFFER_BASE_ADDR;
-            usb_ram_copy((uint8_t*)HID_EP_OUT_ODD_BUFFER_BASE_ADDR, (uint8_t*)g_hid_out_reports[report_num], g_hid_out_report_size[report_num]);
-            hid_out(report_num);
-        }
-        else
-        {
-            report_num = *(uint8_t*)HID_EP_OUT_EVEN_BUFFER_BASE_ADDR;
-            usb_ram_copy((uint8_t*)HID_EP_OUT_EVEN_BUFFER_BASE_ADDR, (uint8_t*)g_hid_out_reports[report_num], g_hid_out_report_size[report_num]);
-            hid_out(report_num);
-        }
+        uint8_t* ep_buff_base_addr = (uint8_t*)HID_EP_OUT_EVEN_BUFFER_BASE_ADDR;
+
+        if(HID_EP_OUT_LAST_PPB == ODD) ep_buff_base_addr = (uint8_t*)HID_EP_OUT_ODD_BUFFER_BASE_ADDR;
+
+        report_num = *ep_buff_base_addr;
+        usb_ram_copy(ep_buff_base_addr, (uint8_t*)g_hid_out_reports[report_num], g_hid_out_report_size[report_num]);
+        hid_out(report_num);
         #else
         report_num = *(uint8_t*)HID_EP_OUT_BUFFER_BASE_ADDR;
         usb_ram_copy((uint8_t*)HID_EP_OUT_BUFFER_BASE_ADDR, (uint8_t*)g_hid_out_reports[report_num], g_hid_out_report_size[report_num]);
@@ -650,16 +634,18 @@ void hid_send_report(uint8_t report_num)
     if(g_hid_report_sent)
     {
         #if PINGPONG_MODE == PINGPONG_1_15 || PINGPONG_MODE == PINGPONG_ALL_EP
+        uint8_t* ep_buffer_base_addr = (uint8_t*)HID_EP_IN_ODD_BUFFER_BASE_ADDR;
+        uint8_t bd_in = HID_BD_IN_ODD;
+
         if(HID_EP_IN_LAST_PPB == ODD)
         {
-            usb_ram_copy((uint8_t*)g_hid_in_reports[report_num], (uint8_t*)HID_EP_IN_EVEN_BUFFER_BASE_ADDR, g_hid_in_report_size[report_num]);
-            hid_arm_ep_in(HID_BD_IN_EVEN, g_hid_in_report_size[report_num]);
+            ep_buffer_base_addr = (uint8_t*)HID_EP_IN_EVEN_BUFFER_BASE_ADDR;
+            bd_in = HID_BD_IN_EVEN;
         }
-        else
-        {
-            usb_ram_copy((uint8_t*)g_hid_in_reports[report_num], (uint8_t*)HID_EP_IN_ODD_BUFFER_BASE_ADDR, g_hid_in_report_size[report_num]);
-            hid_arm_ep_in(HID_BD_IN_ODD, g_hid_in_report_size[report_num]);
-        }
+
+        usb_ram_copy((uint8_t*)g_hid_in_reports[report_num], ep_buffer_base_addr, g_hid_in_report_size[report_num]);
+        hid_arm_ep_in(bd_in, g_hid_in_report_size[report_num]);
+
         #else
         usb_ram_copy((uint8_t*)g_hid_in_reports[report_num], (uint8_t*)HID_EP_IN_BUFFER_BASE_ADDR, g_hid_in_report_size[report_num]);
         hid_arm_ep_in(g_hid_in_report_size[report_num]);

@@ -1,6 +1,6 @@
 /**
  * @file usb.c
- * @brief Contains the USB stack core variables and  functions.
+ * @brief Contains the USB stack core variables and functions.
  * @author John Izzard
  * @date 30/04/2023
  * 
@@ -179,6 +179,20 @@ static void get_status(void);
  * @brief Handles SET_FEATURE and CLEAR_FEATURE requests.
  */
 static void set_clear_feature(void);
+
+/**
+ * @fn void set_clear_feature_ep0(void)
+ * 
+ * @brief Handles SET_FEATURE and CLEAR_FEATURE requests related to EP0.
+ */
+static void set_clear_feature_ep0(void);
+
+/**
+ * @fn void set_clear_feature_epn(void)
+ * 
+ * @brief Handles SET_FEATURE and CLEAR_FEATURE requests related to EPs other than EP0.
+ */
+static void set_clear_feature_epn(void)
 
 /**
  * @fn void set_address(void)
@@ -375,83 +389,74 @@ void usb_tasks(void)
         NOP();
         *((uint8_t*)&g_usb_last_USTAT) = USTAT;  // Save a copy of USTAT and clear the Transaction Complete Flag.
         TRANSACTION_COMPLETE_FLAG = 0;           // This is to advance the FIFO fast as possible.
-        if(TRANSACTION_EP == EP0)
+        
+        if(TRANSACTION_EP != EP0)
         {
-            if(TRANSACTION_DIR == OUT)
-            {
-                #if PINGPONG_MODE == PINGPONG_0_OUT || PINGPONG_MODE == PINGPONG_ALL_EP
-                EP0_OUT_LAST_PPB = PINGPONG_PARITY;
-                if(g_usb_bd_table[PINGPONG_PARITY].STATbits.PID == PID_SETUP_TOKEN)
-                {
-                #else
-                if(g_usb_bd_table[BD0_OUT].STATbits.PID == PID_SETUP_TOKEN)
-                {
-                #endif
-                    process_setup();
-                }
-                else
-                {
-                    if(m_control_stage == DATA_OUT_STAGE)
-                    {
-                        EP0_OUT_DATA_TOGGLE_VAL ^= 1;
-                        usb_out_control_transfer();
-                    }
-                    arm_setup();
-                }
-            }
+            usb_app_tasks();
+            return;
+        }
+        
+        if(TRANSACTION_DIR == OUT)
+        {
+            #if PINGPONG_MODE == PINGPONG_0_OUT || PINGPONG_MODE == PINGPONG_ALL_EP
+            EP0_OUT_LAST_PPB = PINGPONG_PARITY;
+            if(g_usb_bd_table[PINGPONG_PARITY].STATbits.PID == PID_SETUP_TOKEN) process_setup();
+            #else
+            if(g_usb_bd_table[BD0_OUT].STATbits.PID == PID_SETUP_TOKEN) process_setup();
+            #endif
             else
             {
-                #if PINGPONG_MODE == PINGPONG_ALL_EP
-                EP0_IN_LAST_PPB = PINGPONG_PARITY;
-                #endif
-                if(m_control_stage == DATA_IN_STAGE)
+                if(m_control_stage == DATA_OUT_STAGE)
                 {
-                    EP0_IN_DATA_TOGGLE_VAL ^= 1;
-                    usb_in_control_transfer();
+                    EP0_OUT_DATA_TOGGLE_VAL ^= 1;
+                    usb_out_control_transfer();
                 }
-                else
-                {
-                    arm_setup();
-                    if(m_update_address)
-                    {
-                        UADDR = m_saved_address;
-                        if(m_usb_state == STATE_DEFAULT && m_saved_address != 0) m_usb_state = STATE_ADDRESS;
-                        else if(m_saved_address == 0) RESET_CONDITION_FLAG = 1; // Forced Reset.
-                        m_update_address = false;
-                    }
-                }
+                arm_setup();
             }
         }
         else
         {
-            usb_app_tasks();
+            #if PINGPONG_MODE == PINGPONG_ALL_EP
+            EP0_IN_LAST_PPB = PINGPONG_PARITY;
+            #endif
+            if(m_control_stage == DATA_IN_STAGE)
+            {
+                EP0_IN_DATA_TOGGLE_VAL ^= 1;
+                usb_in_control_transfer();
+            }
+            else
+            {
+                arm_setup();
+                if(!m_update_address) return;
+                
+                UADDR = m_saved_address;
+                if(m_usb_state == STATE_DEFAULT && m_saved_address != 0) m_usb_state = STATE_ADDRESS;
+                else if(m_saved_address == 0) RESET_CONDITION_FLAG = 1; // Forced Reset.
+                m_update_address = false;
+            }
         }
     }
 }
     
-void usb_arm_endpoint(bd_t* p_bd, usb_ep_stat_t* p_ep_stat, uint16_t buffer_addr, uint8_t cnt)
+void usb_arm_endpoint(bd_t* p_bd, usb_ep_stat_t* p_ep_stat, uint8_t cnt)
 {
-    if(p_ep_stat->Data_Toggle_Val) p_bd->STAT = _DTSEN | _DTS; // DATA1
-    else p_bd->STAT = _DTSEN; // DATA0
+    p_bd->STAT  = p_ep_stat->Data_Toggle_Val ? _DTSEN | _DTS : _DTSEN;
     p_bd->CNT   = cnt;
-    p_bd->ADR   = buffer_addr;
     p_bd->STAT |= _UOWN;
 }
 
 #if PINGPONG_MODE == PINGPONG_ALL_EP
 void usb_arm_ep0_in(uint8_t bd_table_index, uint8_t cnt)
 {
-    if(g_usb_ep_stat[EP0][IN].Data_Toggle_Val) g_usb_bd_table[bd_table_index].STAT = _DTSEN | _DTS; // DATA1
-    else g_usb_bd_table[bd_table_index].STAT = _DTSEN; // DATA0
-    g_usb_bd_table[bd_table_index].CNT = cnt;
+    g_usb_bd_table[bd_table_index].STAT  = g_usb_ep_stat[EP0][IN].Data_Toggle_Val ? _DTSEN | _DTS : _DTSEN;
+    g_usb_bd_table[bd_table_index].CNT   = cnt;
     g_usb_bd_table[bd_table_index].STAT |= _UOWN;
 }
 #else
 void usb_arm_ep0_in(uint8_t cnt)
 {
-    if(g_usb_ep_stat[EP0][IN].Data_Toggle_Val) g_usb_bd_table[BD0_IN].STAT = _DTSEN | _DTS; // DATA1
-    else g_usb_bd_table[BD0_IN].STAT = _DTSEN; // DATA0
-    g_usb_bd_table[BD0_IN].CNT = cnt;
+    g_usb_bd_table[BD0_IN].STAT  = g_usb_ep_stat[EP0][IN].Data_Toggle_Val ? _DTSEN | _DTS : _DTSEN;
+    g_usb_bd_table[BD0_IN].CNT   = cnt;
     g_usb_bd_table[BD0_IN].STAT |= _UOWN;
 }
 #endif
@@ -475,12 +480,16 @@ void usb_arm_in_status(void)
 
 void usb_stall_ep(bd_t* p_bd)
 {
-        p_bd->STAT  = _BSTALL;
-        p_bd->STAT |= _UOWN;
+    p_bd->STAT  = _BSTALL;
+    p_bd->STAT |= _UOWN;
 }
 
 void usb_in_control_transfer(void)
 {
+    uint8_t bytes = (uint8_t)g_usb_bytes_2_send;
+
+    if(g_usb_bytes_2_send > EP0_SIZE) bytes = EP0_SIZE;
+
     #if PINGPONG_MODE == PINGPONG_ALL_EP
     uint8_t *p_ep;
     uint8_t bd_table_index;
@@ -498,115 +507,78 @@ void usb_in_control_transfer(void)
     
     if(g_usb_bytes_2_send)
     {
-        if(g_usb_bytes_2_send > EP0_SIZE)
+        if(g_usb_sending_from == ROM)
         {
-            if(g_usb_sending_from == ROM)
-            {
-                usb_rom_copy((const uint8_t*)((uint16_t)g_usb_rom_ptr), p_ep, EP0_SIZE);
-                g_usb_rom_ptr += EP0_SIZE;
-            }
-            else
-            {
-                usb_ram_copy((uint8_t*)((uint16_t)g_usb_ram_ptr), p_ep, EP0_SIZE);
-                g_usb_ram_ptr += EP0_SIZE;
-            }
-            usb_arm_ep0_in(bd_table_index, EP0_SIZE);
-            g_usb_bytes_2_send -= EP0_SIZE;
+            usb_rom_copy((const uint8_t*)((uint16_t)g_usb_rom_ptr), p_ep, bytes);
+            g_usb_rom_ptr += bytes;
         }
         else
         {
-            if(g_usb_sending_from == ROM) usb_rom_copy((const uint8_t*)((uint16_t)g_usb_rom_ptr), p_ep, (uint8_t)g_usb_bytes_2_send);
-            else usb_ram_copy((uint8_t*)((uint16_t)g_usb_ram_ptr), p_ep, (uint8_t)g_usb_bytes_2_send);
-            usb_arm_ep0_in(bd_table_index, (uint8_t)g_usb_bytes_2_send);
-            g_usb_bytes_2_send = 0;
+            usb_ram_copy((uint8_t*)((uint16_t)g_usb_ram_ptr), p_ep, bytes);
+            g_usb_ram_ptr += bytes;
         }
+        usb_arm_ep0_in(bd_table_index, bytes);
+        g_usb_bytes_2_send -= bytes;
+        return;
     }
-    else
+
+    if(g_usb_send_short)
     {
-        if(g_usb_send_short)
-        {
-            usb_arm_ep0_in(bd_table_index, 0);
-            g_usb_send_short = false;
-        }
+        usb_arm_ep0_in(bd_table_index, 0);
+        g_usb_send_short = false;
     }
+    
     #else
     if(g_usb_bytes_2_send)
     {
-        if(g_usb_bytes_2_send > EP0_SIZE)
+        if(g_usb_sending_from == ROM)
         {
-            if(g_usb_sending_from == ROM)
-            {
-                usb_rom_copy((const uint8_t*)((uint16_t)g_usb_rom_ptr), m_ep0_in, EP0_SIZE);
-                g_usb_rom_ptr += EP0_SIZE;
-            }
-            else
-            {
-                usb_ram_copy((uint8_t*)((uint16_t)g_usb_ram_ptr), m_ep0_in, EP0_SIZE);
-                g_usb_ram_ptr += EP0_SIZE;
-            }
-            usb_arm_ep0_in(EP0_SIZE);
-            g_usb_bytes_2_send -= EP0_SIZE;
+            usb_rom_copy((const uint8_t*)((uint16_t)g_usb_rom_ptr), m_ep0_in, bytes);
+            g_usb_rom_ptr += bytes;
         }
         else
         {
-            if(g_usb_sending_from == ROM) usb_rom_copy((const uint8_t*)((uint16_t)g_usb_rom_ptr), m_ep0_in, (uint8_t)g_usb_bytes_2_send);
-            else usb_ram_copy((uint8_t*)((uint16_t)g_usb_ram_ptr), m_ep0_in, (uint8_t)g_usb_bytes_2_send);
-            usb_arm_ep0_in((uint8_t)g_usb_bytes_2_send);
-            g_usb_bytes_2_send = 0;
+            usb_ram_copy((uint8_t*)((uint16_t)g_usb_ram_ptr), m_ep0_in, bytes);
+            g_usb_ram_ptr += bytes;
         }
+        usb_arm_ep0_in(bytes);
+        g_usb_bytes_2_send -= bytes;
+        return;
     }
-    else
+
+    if(g_usb_send_short)
     {
-        if(g_usb_send_short)
-        {
-            usb_arm_ep0_in(0);
-            g_usb_send_short = false;
-        }
+        usb_arm_ep0_in(0);
+        g_usb_send_short = false;
     }
     #endif
 }
 
 void usb_out_control_transfer(void)
 {
+    uint8_t bytes = (uint8_t)g_usb_bytes_2_recv;
+
+    if(g_usb_bytes_2_recv > EP0_SIZE) bytes = EP0_SIZE;
+
     #if PINGPONG_MODE == PINGPONG_0_OUT || PINGPONG_MODE == PINGPONG_ALL_EP
-    if(g_usb_bytes_2_recv > EP0_SIZE)
-    {
-        if(PINGPONG_PARITY == EVEN) usb_ram_copy(m_ep0_out_even, g_usb_ram_ptr, EP0_SIZE);
-        else usb_ram_copy(m_ep0_out_odd, g_usb_ram_ptr, EP0_SIZE);
-        g_usb_ram_ptr += EP0_SIZE;
-        g_usb_bytes_2_recv -= EP0_SIZE;
-    }
-    else
-    {
-        if(PINGPONG_PARITY == EVEN) usb_ram_copy(m_ep0_out_even, g_usb_ram_ptr, (uint8_t)g_usb_bytes_2_recv);
-        else usb_ram_copy(m_ep0_out_odd, g_usb_ram_ptr, (uint8_t)g_usb_bytes_2_recv);
-        g_usb_ram_ptr += EP0_SIZE;
-        g_usb_bytes_2_recv = 0;
-    }
+    if(PINGPONG_PARITY == EVEN) usb_ram_copy(m_ep0_out_even, g_usb_ram_ptr, bytes);
+    else usb_ram_copy(m_ep0_out_odd, g_usb_ram_ptr, bytes);
     #else
-    if(g_usb_bytes_2_recv > EP0_SIZE)
-    {
-        usb_ram_copy(m_ep0_out, g_usb_ram_ptr, EP0_SIZE);
-        g_usb_ram_ptr += EP0_SIZE;
-        g_usb_bytes_2_recv -= EP0_SIZE;
-    }
-    else
-    {
-        usb_ram_copy(m_ep0_out, g_usb_ram_ptr, (uint8_t)g_usb_bytes_2_recv);
-        g_usb_ram_ptr += g_usb_bytes_2_recv;
-        g_usb_bytes_2_recv = 0;
-    }
+    usb_ram_copy(m_ep0_out, g_usb_ram_ptr, bytes);
     #endif
-    if(g_usb_bytes_2_recv == 0)
-    {
-        #ifdef USE_OUT_CONTROL_FINISHED
-        if(usb_out_control_finished()) usb_arm_in_status();
-        else usb_request_error();
-        #else
-        usb_arm_in_status();
-        #endif
-        m_control_stage = STATUS_IN_STAGE;
-    }
+
+    g_usb_ram_ptr += bytes;
+    g_usb_bytes_2_recv -= bytes;
+
+    if(g_usb_bytes_2_recv != 0) return;
+
+    #ifdef USE_OUT_CONTROL_FINISHED
+    if(usb_out_control_finished()) usb_arm_in_status();
+    else usb_request_error();
+    #else
+    usb_arm_in_status();
+    #endif
+    m_control_stage = STATUS_IN_STAGE;
 }
 
 void usb_rom_copy(const uint8_t *p_rom, uint8_t *p_ep, uint8_t bytes)
@@ -863,42 +835,35 @@ static void get_status(void)
                 perform_request_error = false;
                 break;
             case ENDPOINT:
-                if(m_usb_state == STATE_ADDRESS)
-                {
-                    if(m_get_status.ZeroInterfaceEndpoint_bits.Endpoint_bits.EndpointNumber == EP0) 
-                        perform_request_error = false;
-                }
-                else
-                {
-                    if(m_get_status.ZeroInterfaceEndpoint_bits.Endpoint_bits.EndpointNumber < NUM_ENDPOINTS) 
-                        perform_request_error = false;
-                }
+                if((m_usb_state == STATE_CONFIGURED)
+                    && (m_get_status.ZeroInterfaceEndpoint_bits.Endpoint_bits.EndpointNumber >= NUM_ENDPOINTS)) break;
+
+                if((m_usb_state != STATE_CONFIGURED)
+                    && (m_get_status.ZeroInterfaceEndpoint_bits.Endpoint_bits.EndpointNumber != EP0)) break;
                 
-                if(perform_request_error == false)
-                {
                     get_status_return.Halt = 
                             g_usb_ep_stat[m_get_status.ZeroInterfaceEndpoint_bits.Endpoint_bits.EndpointNumber][m_get_status.ZeroInterfaceEndpoint_bits.Endpoint_bits.Direction].Halt;
-                }
+                    perform_request_error = false;
                 break;     
         }
     }
     
-    if(perform_request_error)usb_request_error();
+    if(perform_request_error) usb_request_error();
     else
     {
         #if PINGPONG_MODE == PINGPONG_ALL_EP
+        uint8_t* p_ep          = m_ep0_in_odd;
+        uint8_t  bd_table_index = BD0_IN_ODD;
+
         if(EP0_IN_LAST_PPB == ODD)
         {
-            usb_ram_set(0, m_ep0_in_even, 8); // Clear EP ready for data
-            m_ep0_in_even[0] = get_status_return.Byte;
-            usb_arm_ep0_in(BD0_IN_EVEN, 2);
+            p_ep = m_ep0_in_even;
+            bd_table_index = BD0_IN_EVEN;
         }
-        else
-        {
-            usb_ram_set(0, m_ep0_in_odd, 8); // Clear EP ready for data
-            m_ep0_in_odd[0] = get_status_return.Byte;
-            usb_arm_ep0_in(BD0_IN_ODD, 2);
-        }
+
+        usb_ram_set(0, p_ep, 8); // Clear EP ready for data
+        p_ep[0] = get_status_return.Byte;
+        usb_arm_ep0_in(bd_table_index, 2);
         #else
         usb_ram_set(0, m_ep0_in, 8); // Clear EP ready for data
         m_ep0_in[0] = get_status_return.Byte;
@@ -911,7 +876,6 @@ static void get_status(void)
 
 static void set_clear_feature(void)
 {
-    uint8_t bd_table_index;
     bool perform_request_error = true;
     
     if((m_usb_state == STATE_ADDRESS) || (m_usb_state == STATE_CONFIGURED))
@@ -919,95 +883,24 @@ static void set_clear_feature(void)
         switch(m_set_clear_feature.bmRequestType_bits.Recipient)
         {
             case DEVICE:
-                if(m_set_clear_feature.FeatureSelector == DEVICE_REMOTE_WAKEUP)
-                {
-                    if(g_usb_setup.bRequest == CLEAR_FEATURE)
-                    {
-                        m_dev_settings.Remote_Wakeup = REMOTE_WAKEUP_OFF;
-                    }
-                    else
-                    {
-                        m_dev_settings.Remote_Wakeup = REMOTE_WAKEUP_ON;
-                    }
-                    perform_request_error = false;
-                }
+                if(m_set_clear_feature.FeatureSelector != DEVICE_REMOTE_WAKEUP) break;
+
+                m_dev_settings.Remote_Wakeup = g_usb_setup.bRequest == CLEAR_FEATURE ? REMOTE_WAKEUP_OFF : REMOTE_WAKEUP_ON;
+                perform_request_error = false;
                 break;
             case ENDPOINT:
-                if(m_set_clear_feature.FeatureSelector == ENDPOINT_HALT)
-                {
-                    if(m_usb_state == STATE_CONFIGURED)
-                    {
-                        if(m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.EndpointNumber < NUM_ENDPOINTS)
-                            perform_request_error = false;
-                    }
-                    else
-                    {
-                        if(m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.EndpointNumber == EP0)
-                            perform_request_error = false;
-                    }
-                    if(perform_request_error == false)
-                    {
-                        if(m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.EndpointNumber == EP0)
-                        {
-                            #if PINGPONG_MODE == PINGPONG_ALL_EP                            
-                            if(g_usb_setup.bRequest == CLEAR_FEATURE)
-                            {
-                                g_usb_ep_stat[EP0][IN].Halt      = 0;
-                                g_usb_bd_table[BD0_IN_EVEN].STAT = 0;
-                                g_usb_bd_table[BD0_IN_ODD].STAT  = 0;
-                            }
-                            else
-                            {
-                                g_usb_ep_stat[EP0][IN].Halt = 1;
-                                usb_stall_ep(&g_usb_bd_table[BD0_IN_EVEN]);
-                                usb_stall_ep(&g_usb_bd_table[BD0_IN_ODD]);
-                            }
-                            #else
-                            if(g_usb_setup.bRequest == CLEAR_FEATURE)
-                            {
-                                g_usb_ep_stat[EP0][IN].Halt = 0;
-                                g_usb_bd_table[BD0_IN].STAT = 0;
-                            }
-                            else
-                            {
-                                g_usb_ep_stat[EP0][IN].Halt = 1;
-                                usb_stall_ep(&g_usb_bd_table[BD0_IN]);
-                            }
-                            #endif
-                        }
-                        else
-                        {
-                            #if PINGPONG_MODE == PINGPONG_DIS
-                            bd_table_index = (m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.EndpointNumber * 2u) + 
-                                              m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.Direction;
-                            #elif PINGPONG_MODE == PINGPONG_0_OUT
-                            bd_table_index = (m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.EndpointNumber * 2u) + 1u + 
-                                              m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.Direction;
-                            #elif PINGPONG_MODE == PINGPONG_1_15
-                            bd_table_index = (m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.EndpointNumber * 2u) + 1u + 
-                                              m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.Direction;
-                            #else
-                            bd_table_index = (m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.EndpointNumber * 2u) + 2u + 
-                                             (m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.Direction * 2u);
-                            #endif
-                            if(g_usb_setup.bRequest == CLEAR_FEATURE)
-                            {
-                                usb_app_clear_halt(bd_table_index, 
-                                                   m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.EndpointNumber, 
-                                                   m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.Direction);
-                            }
-                            else
-                            {
-                                g_usb_ep_stat[m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.EndpointNumber][m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.Direction].Halt = 1;
-                                usb_stall_ep(&g_usb_bd_table[bd_table_index]);
-                                #if PINGPONG_MODE == PINGPONG_1_15 || PINGPONG_MODE == PINGPONG_ALL_EP
-                                bd_table_index++;
-                                usb_stall_ep(&g_usb_bd_table[bd_table_index]);
-                                #endif
-                            }
-                        }
-                    }
-                }
+                if(m_set_clear_feature.FeatureSelector != ENDPOINT_HALT) break;
+
+                if((m_usb_state == STATE_CONFIGURED)
+                    && (m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.EndpointNumber >= NUM_ENDPOINTS)) break;
+
+                if((m_usb_state != STATE_CONFIGURED)
+                    && (m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.EndpointNumber != EP0)) break;
+
+                if(m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.EndpointNumber == EP0) set_clear_feature_ep0();
+                else set_clear_feature_epn();
+
+                perform_request_error = false;
                 break;
         }
     }
@@ -1016,6 +909,69 @@ static void set_clear_feature(void)
     {
         usb_arm_in_status();
         m_control_stage = STATUS_IN_STAGE;
+    }
+}
+
+static void set_clear_feature_ep0(void)
+{
+    #if PINGPONG_MODE == PINGPONG_ALL_EP                            
+    if(g_usb_setup.bRequest == CLEAR_FEATURE)
+    {
+        g_usb_ep_stat[EP0][IN].Halt      = 0;
+        g_usb_bd_table[BD0_IN_EVEN].STAT = 0;
+        g_usb_bd_table[BD0_IN_ODD].STAT  = 0;
+    }
+    else
+    {
+        g_usb_ep_stat[EP0][IN].Halt = 1;
+        usb_stall_ep(&g_usb_bd_table[BD0_IN_EVEN]);
+        usb_stall_ep(&g_usb_bd_table[BD0_IN_ODD]);
+    }
+    #else
+    if(g_usb_setup.bRequest == CLEAR_FEATURE)
+    {
+        g_usb_ep_stat[EP0][IN].Halt = 0;
+        g_usb_bd_table[BD0_IN].STAT = 0;
+    }
+    else
+    {
+        g_usb_ep_stat[EP0][IN].Halt = 1;
+        usb_stall_ep(&g_usb_bd_table[BD0_IN]);
+    }
+    #endif
+}
+
+static void set_clear_feature_epn(void)
+{
+    uint8_t bd_table_index;
+
+    #if PINGPONG_MODE == PINGPONG_DIS
+    bd_table_index = (m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.EndpointNumber * 2u) + 
+                        m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.Direction;
+    #elif PINGPONG_MODE == PINGPONG_0_OUT
+    bd_table_index = (m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.EndpointNumber * 2u) + 1u + 
+                        m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.Direction;
+    #elif PINGPONG_MODE == PINGPONG_1_15
+    bd_table_index = (m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.EndpointNumber * 2u) + 1u + 
+                        m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.Direction;
+    #else
+    bd_table_index = (m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.EndpointNumber * 2u) + 2u + 
+                        (m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.Direction * 2u);
+    #endif
+    if(g_usb_setup.bRequest == CLEAR_FEATURE)
+    {
+        usb_app_clear_halt(bd_table_index, 
+                            m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.EndpointNumber, 
+                            m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.Direction);
+    }
+    else
+    {
+        g_usb_ep_stat[m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.EndpointNumber][m_set_clear_feature.ZeroInterfaceEndpoint_bits.Endpoint_bits.Direction].Halt = 1;
+        usb_stall_ep(&g_usb_bd_table[bd_table_index]);
+        #if PINGPONG_MODE == PINGPONG_1_15 || PINGPONG_MODE == PINGPONG_ALL_EP
+        bd_table_index++;
+        usb_stall_ep(&g_usb_bd_table[bd_table_index]);
+        #endif
     }
 }
 
@@ -1042,21 +998,19 @@ static void get_descriptor(void)
         case DEVICE_QUALIFIER_DESC:
             break;
         case CONFIGURATION_DESC:
-            if(g_usb_get_descriptor.DescriptorIndex < NUM_CONFIGURATIONS)
-            {
-                g_usb_rom_ptr         = (const uint8_t*) g_config_descriptors[g_usb_get_descriptor.DescriptorIndex];
-                ptr                   = (const uint16_t*)g_config_descriptors[g_usb_get_descriptor.DescriptorIndex];
-                g_usb_bytes_available = ptr[1];
-                perform_request_error = false;
-            }
+            if(g_usb_get_descriptor.DescriptorIndex >= NUM_CONFIGURATIONS) break;
+
+            g_usb_rom_ptr         = (const uint8_t*) g_config_descriptors[g_usb_get_descriptor.DescriptorIndex];
+            ptr                   = (const uint16_t*)g_config_descriptors[g_usb_get_descriptor.DescriptorIndex];
+            g_usb_bytes_available = ptr[1];
+            perform_request_error = false;
             break;
         case STRING_DESC:
-            if(g_usb_get_descriptor.DescriptorIndex < g_size_of_sd)
-            {
-                g_usb_rom_ptr         = (const uint8_t*)g_string_descriptors[g_usb_get_descriptor.DescriptorIndex];
-                g_usb_bytes_available = g_usb_rom_ptr[0];
-                perform_request_error = false;
-            }
+            if(g_usb_get_descriptor.DescriptorIndex >= g_size_of_sd) break;
+
+            g_usb_rom_ptr         = (const uint8_t*)g_string_descriptors[g_usb_get_descriptor.DescriptorIndex];
+            g_usb_bytes_available = g_usb_rom_ptr[0];
+            perform_request_error = false;
             break;
         default:
             if(usb_get_class_descriptor()) perform_request_error = false;
@@ -1068,8 +1022,7 @@ static void get_descriptor(void)
         if(g_usb_bytes_available < g_usb_get_descriptor.DescriptorLength)
         {
             g_usb_bytes_2_send = g_usb_bytes_available;
-            if(g_usb_bytes_available % EP0_SIZE) g_usb_send_short = false;
-            else g_usb_send_short = true;
+            g_usb_send_short = g_usb_bytes_available % EP0_SIZE ? false : true;
         }
         else
         {
@@ -1192,7 +1145,7 @@ static void get_interface(void)
         }
         else
         {
-            m_EP0_IN_ODD[0] = get_interface_return;
+            m_ep0_in_odd[0] = get_interface_return;
             usb_arm_ep0_in(BD0_IN_ODD, 1);
         }
         #else
