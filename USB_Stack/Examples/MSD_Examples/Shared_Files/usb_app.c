@@ -2,10 +2,10 @@
  * @file usb_app.c
  * @brief Contains application specific functions.
  * @author John Izzard
- * @date 29/04/2021
+ * @date 17/12/2023
  * 
  * USB uC - USB Application file (This file is for the MSD Examples).
- * Copyright (C) 2017-2021  John Izzard
+ * Copyright (C) 2017-2023  John Izzard
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,8 +31,7 @@ bool usb_service_class_request(void)
     return msd_class_request();
 }
 
-
-bool usb_get_class_descriptor(void)
+bool usb_get_class_descriptor(const uint8_t** descriptor, uint16_t* size)
 {
     return false; // No class descriptors for MSD.
 }
