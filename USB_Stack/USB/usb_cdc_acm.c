@@ -2,7 +2,7 @@
  * @file usb_cdc_acm.c
  * @brief <i>Communications Device Class</i> core.
  * @author John Izzard
- * @date 30/04/2023
+ * @date 17/12/2023
  * 
  * USB uC - CDC Library.
  * Copyright (C) 2017-2023  John Izzard
@@ -88,33 +88,23 @@ void cdc_arm_data_ep_in(uint8_t cnt)
 bool cdc_class_request(void)
 {
     static uint8_t dummy_buffer[8] = {0};
+    uint16_t bytes_available;
     
     switch(g_usb_setup.bRequest)
     {
         #ifdef USE_GET_LINE_CODING
         case GET_LINE_CODING:
-            g_usb_ram_ptr = (uint8_t*)&g_cdc_get_line_coding_return;
-            g_usb_bytes_available = 7;
-            if(g_usb_bytes_available < g_cdc_set_get_line_coding.Size_of_Structure)
-            {
-                g_usb_bytes_2_send = g_usb_bytes_available;
-                g_usb_send_short   = g_cdc_set_get_line_coding.Size_of_Structure % g_usb_bytes_available ? true : false;
-            }
-            else
-            {
-                g_usb_bytes_2_send = g_cdc_set_get_line_coding.Size_of_Structure;
-                g_usb_send_short   = false;
-            }
-            g_usb_sending_from = RAM;
+            usb_set_ram_ptr((uint8_t*)&g_cdc_get_line_coding_return);
+            usb_setup_in_control_transfer(RAM, 7, g_cdc_set_get_line_coding.Size_of_Structure);
             usb_in_control_transfer();
             usb_set_control_stage(DATA_IN_STAGE);
             return true;
         #endif
         #ifdef USE_SET_LINE_CODING
         case SET_LINE_CODING:
-            g_usb_ram_ptr = (uint8_t*)&g_cdc_set_line_coding;
+            usb_set_ram_ptr((uint8_t*)&g_cdc_set_line_coding);
             if(g_cdc_set_get_line_coding.Size_of_Structure > 7) return false;
-            g_usb_bytes_2_recv = g_cdc_set_get_line_coding.Size_of_Structure;
+            usb_set_num_out_control_bytes(g_cdc_set_get_line_coding.Size_of_Structure);
             g_cdc_set_line_coding_wait = true;
             usb_set_control_stage(DATA_OUT_STAGE);
             return true;
@@ -127,33 +117,20 @@ bool cdc_class_request(void)
             return true;
         #endif
         case SEND_ENCAPSULATED_COMMAND:
-            g_usb_ram_ptr = dummy_buffer;
+            usb_set_ram_ptr(dummy_buffer);
             if(g_usb_setup.wLength > 8) return false;
-            g_usb_bytes_2_recv = g_usb_setup.wLength;
+            usb_set_num_out_control_bytes(g_usb_setup.wLength);
             usb_set_control_stage(DATA_OUT_STAGE);
             return true;
         case GET_ENCAPSULATED_RESPONSE:
-            g_usb_ram_ptr = dummy_buffer;
-            g_usb_bytes_available = 8;
-            if(g_usb_bytes_available < g_usb_setup.wLength)
-            {
-                g_usb_bytes_2_send = g_usb_bytes_available;
-                g_usb_send_short   = g_usb_setup.wLength % g_usb_bytes_available ? true : false;
-            }
-            else
-            {
-                g_usb_bytes_2_send = g_usb_setup.wLength;
-                g_usb_send_short   = false;
-            }
-            g_usb_sending_from = RAM;
+            usb_set_ram_ptr(dummy_buffer);
+            usb_setup_in_control_transfer(RAM, 8, g_usb_setup.wLength);
             usb_in_control_transfer();
             usb_set_control_stage(DATA_IN_STAGE);
             return true;
         default:
             return false;
     }
-    
-
 }
 
 void cdc_init(void)
@@ -230,24 +207,25 @@ void cdc_clear_ep_toggle(void)
 
 void cdc_tasks(void)
 {
-    if(TRANSACTION_EP == CDC_COM_EP)
+    switch(TRANSACTION_EP)
     {
-        CDC_COM_EP_IN_DATA_TOGGLE_VAL ^= 1;
-        cdc_notification();
-    }
-    else if(TRANSACTION_EP == CDC_DAT_EP)
-    {
-        if(TRANSACTION_DIR == OUT)
-        {
-            CDC_DAT_EP_OUT_DATA_TOGGLE_VAL ^= 1;
-            g_cdc_num_data_out = g_usb_bd_table[CDC_DAT_BD_OUT].CNT;
-            cdc_data_out();
-        }
-        else
-        {
-            CDC_DAT_EP_IN_DATA_TOGGLE_VAL ^= 1;
-            cdc_data_in();
-        }
+        case CDC_COM_EP:
+            CDC_COM_EP_IN_DATA_TOGGLE_VAL ^= 1;
+            cdc_notification();
+            break;
+        case CDC_DAT_EP:
+            if(TRANSACTION_DIR == OUT)
+            {
+                CDC_DAT_EP_OUT_DATA_TOGGLE_VAL ^= 1;
+                g_cdc_num_data_out = g_usb_bd_table[CDC_DAT_BD_OUT].CNT;
+                cdc_data_out();
+            }
+            else
+            {
+                CDC_DAT_EP_IN_DATA_TOGGLE_VAL ^= 1;
+                cdc_data_in();
+            }
+            break;
     }
 }
 
@@ -257,9 +235,9 @@ bool cdc_out_control_tasks(void)
     if(g_cdc_set_line_coding_wait)
     {
         g_cdc_set_line_coding_wait = false;
-        if(g_cdc_set_line_coding.bCharFormat != 0) return false;
-        if(g_cdc_set_line_coding.bParityType != 0) return false;
-        if(g_cdc_set_line_coding.bDataBits   != 8) return false;
+        if((g_cdc_set_line_coding.bCharFormat != 0)
+            || (g_cdc_set_line_coding.bParityType != 0)
+            || (g_cdc_set_line_coding.bDataBits   != 8)) return false;
         
         g_cdc_get_line_coding_return.dwDTERate   = g_cdc_set_line_coding.dwDTERate;
         g_cdc_get_line_coding_return.bCharFormat = g_cdc_set_line_coding.bCharFormat;

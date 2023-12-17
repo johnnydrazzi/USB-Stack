@@ -2,7 +2,7 @@
  * @file usb.h
  * @brief Contains definitions used by the core USB stack and declaration of global functions and variables.
  * @author John Izzard
- * @date 30/04/2023
+ * @date 17/12/2023
  * 
  * USB uC - USB Stack.
  * Copyright (C) 2017-2023  John Izzard
@@ -282,13 +282,6 @@ extern ch9_get_descriptor_t    g_usb_get_descriptor    __at(SETUP_DATA_ADDR);
 extern ch9_set_configuration_t g_usb_set_configuration __at(SETUP_DATA_ADDR);
 extern ch9_set_interface_t     g_usb_set_interface     __at(SETUP_DATA_ADDR);
 
-extern uint16_t                g_usb_bytes_available;
-extern uint16_t                g_usb_bytes_2_send;
-extern uint16_t                g_usb_bytes_2_recv;
-extern bool                    g_usb_send_short;
-extern uint8_t                 g_usb_sending_from;
-extern const uint8_t          *g_usb_rom_ptr;
-extern uint8_t                *g_usb_ram_ptr;
 extern bd_t                    g_usb_bd_table[NUM_BD] __at(BDT_BASE_ADDR);
 
 /* ************************************************************************** */
@@ -479,9 +472,26 @@ void usb_stall_ep(bd_t* p_bd);
  * @fn void usb_out_control_transfer(void)
  * 
  * @brief Processes a OUT Control (EP0 OUT) transaction. <b>So far not used</b>
- * 
  */
 void usb_out_control_transfer(void);
+
+/**
+ * @fn void usb_set_num_out_control_bytes(uint16_t bytes)
+ * 
+ * @brief Sets the number of bytes in the out control transfer.
+ * 
+ * @param[in] bytes Amount of bytes in transfer.
+ */
+void usb_set_num_out_control_bytes(uint16_t bytes);
+
+/**
+ * @fn void usb_set_num_in_control_bytes(uint16_t bytes)
+ * 
+ * @brief Sets the number of bytes in the in control transfer.
+ * 
+ * @param[in] bytes Amount of bytes in transfer.
+ */
+void usb_set_num_in_control_bytes(uint16_t bytes);
 
 // TODO: Is this needed?
 void usb_out_control_status(void);
@@ -490,45 +500,80 @@ void usb_out_control_status(void);
  * @fn void usb_in_control_transfer(void)
  * 
  * @brief Processes a IN Control (EP0 IN) transaction.
- * 
  */
 void usb_in_control_transfer(void);
 
 /**
- * @fn void usb_rom_copy(const uint8_t *p_rom, uint8_t *p_ep, uint8_t bytes)
+ * @fn void usb_rom_copy(const uint8_t* p_rom, uint8_t* p_ep, uint8_t bytes)
  * 
  * @brief Copy values from ROM and place in endpoint.
  * 
  * @param[in] *p_rom Pointer to the address in ROM to copy from.
  * @param[in] *p_ep Pointer to the endpoint address in RAM to copy to.
  * @param[in] bytes Amount of bytes to copy.
- * 
  */
-void usb_rom_copy(const uint8_t *p_rom, uint8_t *p_ep, uint8_t bytes);
+void usb_rom_copy(const uint8_t* p_rom, uint8_t* p_ep, uint8_t bytes);
 
 /**
- * @fn void usb_ram_copy(uint8_t *p_ram1, uint8_t *p_ram2, uint8_t bytes)
+ * @fn void usb_ram_copy(uint8_t* p_ram1, uint8_t* p_ram2, uint8_t bytes)
  * 
  * @brief Copy values from RAM and place in endpoint.
  * 
  * @param[in] *p_ram1 Pointer to the address in RAM to copy from.
  * @param[in] *p_ram2 Pointer to the endpoint address in RAM to copy to.
  * @param[in] bytes Amount of bytes to copy.
- * 
  */
-void usb_ram_copy(uint8_t *p_ram1, uint8_t *p_ram2, uint8_t bytes);
+void usb_ram_copy(uint8_t* p_ram1, uint8_t* p_ram2, uint8_t bytes);
 
 /**
- * @fn void usb_ram_set(uint8_t val, uint8_t *p_ram, uint16_t bytes)
+ * @fn void usb_ram_set(uint8_t val, uint8_t* p_ram, uint16_t bytes)
  * 
  * @brief Set an area of RAM to a particular value. Useful for clearing an endpoint.
  * 
  * @param[in] val Value to set to.
  * @param[in] *p_ram Pointer to the starting RAM address.
  * @param[in] bytes Amount of bytes to set.
- * 
  */
-void usb_ram_set(uint8_t val, uint8_t *p_ram, uint16_t bytes);
+void usb_ram_set(uint8_t val, uint8_t* p_ram, uint16_t bytes);
+
+/**
+ * @fn void usb_setup_in_control_transfer(uint8_t ram_rom, uint16_t bytes_available, uint16_t requested_length)
+ * 
+ * @brief Setup for in control transfer by calculating the amount of bytes we will send and if we need to end the
+ * transfer short.
+ * 
+ * @param[in] ram_rom Are we sending data from RAM or ROM.
+ * @param[in] bytes_available Amount of data available to send.
+ * @param[in] requested_length Amount of data requested.
+ * 
+ * <b>Code Example:</b>
+ * <ul style="list-style-type:none"><li>
+ * @code
+ * usb_setup_in_control_transfer(RAM, bytes_available, m_get_set_report.Report_Length);
+ * usb_in_control_transfer();
+ * usb_set_control_stage(DATA_IN_STAGE);
+ * @endcode
+ * </li></ul>
+ */
+void usb_setup_in_control_transfer(uint8_t ram_rom, uint16_t bytes_available, uint16_t requested_length);
+
+/**
+ * @fn void usb_set_ram_ptr(uint8_t* data)
+ * 
+ * @brief Point to data in RAM to be sent.
+ * 
+ * @param[in] *data Data to send from RAM.
+ */
+void usb_set_ram_ptr(uint8_t* data);
+
+/**
+ * @fn usb_set_rom_ptr(const uint8_t* data)
+ * 
+ * @brief Point to data in ROM to be sent.
+ * 
+ * @param[in] *data Data to send from ROM.
+ */
+void usb_set_rom_ptr(const uint8_t* data);
 
 // TODO: descriptions for these
 // USER FUNCTIONS TO PLACE IN MAIN

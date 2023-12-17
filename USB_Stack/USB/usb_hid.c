@@ -2,7 +2,7 @@
  * @file usb_hid.c
  * @brief Contains <i>Human Interface Device Class</i> functions.
  * @author John Izzard
- * @date 30/04/2023
+ * @date 17/12/2023
  * 
  * USB uC - HID Library.
  * Copyright (C) 2017-2023  John Izzard
@@ -264,17 +264,24 @@ bool hid_class_request(void)
     }
 }
 
-bool hid_get_class_descriptor(void)
+bool hid_get_class_descriptor(const uint8_t** descriptor, uint16_t* size)
 {
+    // Stupid compiler cuts off address at 8 bits!
+    uint32_t address;
+    
     switch(g_usb_get_descriptor.DescriptorType)
     {
         case HID_DESC:
-            g_usb_rom_ptr = g_hid_descriptor;
-            g_usb_bytes_available = 9;
+            //*descriptor = g_hid_descriptor; <----
+            address = (uint32_t)g_hid_descriptor;
+            *descriptor = (const uint8_t*)address;
+            *size = 9;
             return true;
         case HID_REPORT_DESC:
-            g_usb_rom_ptr = g_hid_report_descriptor;
-            g_usb_bytes_available = g_hid_report_descriptor_size;
+            //*descriptor = g_hid_report_descriptor; <----
+            address = (uint32_t)g_hid_report_descriptor;
+            *descriptor = (const uint8_t*)address;
+            *size = g_hid_report_descriptor_size;
             return true;
         default:
             return false;
@@ -450,6 +457,8 @@ void hid_clear_ep_toggle(void)
 
 static bool get_report(void)
 {
+    uint16_t bytes_available = 0;
+
     if(m_get_set_report.Report_Type == REPORT_INPUT)
     {
         #if HID_NUM_IN_REPORTS == 0
@@ -457,13 +466,13 @@ static bool get_report(void)
         #else
         #if HID_NUM_REPORT_IDS == 0
         if(m_get_set_report.Report_ID != 0) return false;
-        g_usb_ram_ptr = (uint8_t*)g_hid_in_reports[0];
-        g_usb_bytes_available = g_hid_in_report_size[0];
+        usb_set_ram_ptr((uint8_t*)g_hid_in_reports[0]);
+        bytes_available = g_hid_in_report_size[0];
         #else
         if(m_get_set_report.Report_ID > HID_NUM_REPORT_IDS) return false;
         if(m_get_set_report.Report_ID == 0) return false;
-        g_usb_ram_ptr = (uint8_t*)g_hid_in_reports[m_get_set_report.Report_ID - 1u];
-        g_usb_bytes_available = g_hid_in_report_size[m_get_set_report.Report_ID - 1u];
+        usb_set_ram_ptr((uint8_t*)g_hid_in_reports[m_get_set_report.Report_ID - 1u]);
+        bytes_available = g_hid_in_report_size[m_get_set_report.Report_ID - 1u];
         #endif
         #endif
     }
@@ -474,30 +483,19 @@ static bool get_report(void)
         #else
         #if HID_NUM_REPORT_IDS == 0
         if(m_get_set_report.Report_ID != 0) return false;
-        g_usb_ram_ptr = (uint8_t*)g_hid_feature_reports[0];
-        g_usb_bytes_available = g_hid_feature_report_size[0];
+        usb_set_ram_ptr((uint8_t*)g_hid_feature_reports[0]);
+        bytes_available = g_hid_feature_report_size[0];
         #else
         if(m_get_set_report.Report_ID > HID_NUM_REPORT_IDS) return false;
         if(m_get_set_report.Report_ID == 0) return false;
-        g_usb_ram_ptr = (uint8_t*)g_hid_feature_reports[m_get_set_report.Report_ID - 1u];
-        g_usb_bytes_available = g_hid_feature_report_size[m_get_set_report.Report_ID - 1u];
+        usb_set_ram_ptr((uint8_t*)g_hid_feature_reports[m_get_set_report.Report_ID - 1u]);
+        bytes_available = g_hid_feature_report_size[m_get_set_report.Report_ID - 1u];
         #endif
         #endif
     }
     else return false;
     #if HID_NUM_IN_REPORTS != 0 || HID_NUM_FEATURE_REPORTS != 0
-    if(m_get_set_report.Report_Length > g_usb_bytes_available)
-    {
-        g_usb_bytes_2_send = g_usb_bytes_available;
-        if(m_get_set_report.Report_Length % g_usb_bytes_available) g_usb_send_short = true;
-        else g_usb_send_short = false;
-    }
-    else
-    {
-        g_usb_bytes_2_send = m_get_set_report.Report_Length;
-        g_usb_send_short = false;
-    }
-    g_usb_sending_from = RAM;
+    usb_setup_in_control_transfer(RAM, bytes_available, m_get_set_report.Report_Length);
     usb_in_control_transfer();
     usb_set_control_stage(DATA_IN_STAGE);
     return true;
@@ -507,6 +505,8 @@ static bool get_report(void)
 #ifdef USE_SET_REPORT
 static bool set_report(void)
 {
+    uint16_t bytes_available = 0;
+
     if(m_get_set_report.Report_Type == REPORT_OUTPUT)
     {
         #if HID_NUM_OUT_REPORTS == 0
@@ -514,13 +514,13 @@ static bool set_report(void)
         #else
         #if HID_NUM_REPORT_IDS == 0
         if(m_get_set_report.Report_ID != 0) return false;
-        g_usb_ram_ptr = (uint8_t*)g_hid_out_reports[0];
-        g_usb_bytes_available = g_hid_out_report_size[0];
+        usb_set_ram_ptr((uint8_t*)g_hid_out_reports[0]);
+        bytes_available = g_hid_out_report_size[0];
         #else
         if(m_get_set_report.Report_ID > HID_NUM_REPORT_IDS) return false;
         if(m_get_set_report.Report_ID == 0) return false;
-        g_usb_ram_ptr = (uint8_t*)g_hid_out_reports[m_get_set_report.Report_ID - 1u];
-        g_usb_bytes_available = g_hid_out_report_size[m_get_set_report.Report_ID - 1u];
+        usb_set_ram_ptr((uint8_t*)g_hid_out_reports[m_get_set_report.Report_ID - 1u]);
+        bytes_available = g_hid_out_report_size[m_get_set_report.Report_ID - 1u];
         #endif
         #endif
     }
@@ -531,20 +531,20 @@ static bool set_report(void)
         #else
         #if HID_NUM_REPORT_IDS == 0
         if(m_get_set_report.Report_ID != 0) return false;
-        g_usb_ram_ptr = (uint8_t*)g_hid_feature_reports[0];
-        g_usb_bytes_available = g_hid_feature_report_size[0];
+        usb_set_ram_ptr((uint8_t*)g_hid_feature_reports[0]);
+        bytes_available = g_hid_feature_report_size[0];
         #else
         if(m_get_set_report.Report_ID > HID_NUM_REPORT_IDS) return false;
         if(m_get_set_report.Report_ID == 0) return false;
-        g_usb_ram_ptr = (uint8_t*)g_hid_feature_reports[m_get_set_report.Report_ID - 1u];
-        g_usb_bytes_available = g_hid_feature_report_size[m_get_set_report.Report_ID - 1u];
+        usb_set_ram_ptr((uint8_t*)g_hid_feature_reports[m_get_set_report.Report_ID - 1u]);
+        bytes_available = g_hid_feature_report_size[m_get_set_report.Report_ID - 1u];
         #endif
         #endif
     }
     else return false;
     #if HID_NUM_OUT_REPORTS != 0 || HID_NUM_FEATURE_REPORTS != 0
-    if(m_get_set_report.Report_Length > g_usb_bytes_available) return false;
-    g_usb_bytes_2_recv = m_get_set_report.Report_Length;
+    if(m_get_set_report.Report_Length > bytes_available) return false;
+    usb_set_num_out_control_bytes(m_get_set_report.Report_Length);
     usb_set_control_stage(DATA_OUT_STAGE);
     return true;
     #endif
@@ -559,16 +559,15 @@ static bool get_idle(void)
     #else
     #if HID_NUM_REPORT_IDS == 0
     if(m_get_idle.Report_ID != 0) return false;
-    g_usb_ram_ptr = (uint8_t*)&g_hid_in_report_settings[0].Idle_Duration_4ms;
+    usb_set_ram_ptr((uint8_t*)&g_hid_in_report_settings[0].Idle_Duration_4ms);
     #else
     if(m_get_idle.Report_ID > HID_NUM_REPORT_IDS) return false;
     if(m_get_idle.Report_ID == 0) return false;
-    g_usb_ram_ptr = (uint8_t*)&g_hid_in_report_settings[m_get_idle.Report_ID-1u].Idle_Duration_4ms;
+    usb_set_ram_ptr((uint8_t*)&g_hid_in_report_settings[m_get_idle.Report_ID-1u].Idle_Duration_4ms);
     #endif
     if(m_get_idle.wLength != 1) return false;
-    g_usb_send_short = false;
-    g_usb_bytes_2_send = 1;
-    g_usb_sending_from = RAM;
+
+    usb_setup_in_control_transfer(RAM, 1, 1);
     
     #if PINGPONG_MODE == PINGPONG_ALL_EP
     EP0_IN_LAST_PPB ^= 1;

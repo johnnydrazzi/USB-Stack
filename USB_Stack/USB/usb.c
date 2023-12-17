@@ -2,7 +2,7 @@
  * @file usb.c
  * @brief Contains the USB stack core variables and functions.
  * @author John Izzard
- * @date 30/04/2023
+ * @date 17/12/2023
  * 
  * USB uC - USB Stack.
  * Copyright (C) 2017-2023  John Izzard
@@ -78,15 +78,8 @@ ch9_set_configuration_t g_usb_set_configuration __at(SETUP_DATA_ADDR);
 ch9_set_interface_t     g_usb_set_interface     __at(SETUP_DATA_ADDR);
 ch9_get_interface_t     g_get_interface         __at(SETUP_DATA_ADDR);
 
-usb_ep_stat_t       g_usb_ep_stat[NUM_ENDPOINTS][2];
-uint16_t            g_usb_bytes_available;
-uint16_t            g_usb_bytes_2_send;
-uint16_t            g_usb_bytes_2_recv;
-bool                g_usb_send_short;
-uint8_t             g_usb_sending_from;
-const uint8_t      *g_usb_rom_ptr;
-uint8_t            *g_usb_ram_ptr;
-bd_t                g_usb_bd_table[NUM_BD] __at(BDT_BASE_ADDR);
+usb_ep_stat_t           g_usb_ep_stat[NUM_ENDPOINTS][2];
+bd_t                    g_usb_bd_table[NUM_BD] __at(BDT_BASE_ADDR);
 
 // The following are from: usb_descriptors.c
 extern const ch9_device_descriptor_t g_device_descriptor;
@@ -127,6 +120,14 @@ static uint8_t             m_current_configuration;
 static ch9_get_status_t        m_get_status        __at(SETUP_DATA_ADDR);
 static ch9_set_address_t       m_set_address       __at(SETUP_DATA_ADDR);
 static ch9_set_clear_feature_t m_set_clear_feature __at(SETUP_DATA_ADDR);
+
+static const uint8_t*      m_rom_ptr;
+static uint8_t*            m_ram_ptr;
+static uint8_t             m_sending_from;
+static bool                m_send_short;
+
+static uint16_t            m_bytes_2_recv;
+static uint16_t            m_bytes_2_send;
 
 /* ************************************************************************** */
 
@@ -484,11 +485,27 @@ void usb_stall_ep(bd_t* p_bd)
     p_bd->STAT |= _UOWN;
 }
 
+void usb_setup_in_control_transfer(uint8_t ram_rom, uint16_t bytes_available, uint16_t requested_length)
+{
+    m_sending_from = ram_rom;
+
+    if(bytes_available < requested_length)
+    {
+        m_bytes_2_send = bytes_available;
+        m_send_short   = bytes_available % EP0_SIZE ? false : true;
+    }
+    else
+    {
+        m_bytes_2_send = requested_length;
+        m_send_short   = false;
+    }
+}
+
 void usb_in_control_transfer(void)
 {
-    uint8_t bytes = (uint8_t)g_usb_bytes_2_send;
+    uint8_t bytes = (uint8_t)m_bytes_2_send;
 
-    if(g_usb_bytes_2_send > EP0_SIZE) bytes = EP0_SIZE;
+    if(m_bytes_2_send > EP0_SIZE) bytes = EP0_SIZE;
 
     #if PINGPONG_MODE == PINGPONG_ALL_EP
     uint8_t *p_ep;
@@ -505,72 +522,72 @@ void usb_in_control_transfer(void)
         bd_table_index = BD0_IN_EVEN;
     }
     
-    if(g_usb_bytes_2_send)
+    if(m_bytes_2_send)
     {
-        if(g_usb_sending_from == ROM)
+        if(m_sending_from == ROM)
         {
-            usb_rom_copy((const uint8_t*)((uint16_t)g_usb_rom_ptr), p_ep, bytes);
-            g_usb_rom_ptr += bytes;
+            usb_rom_copy((const uint8_t*)((uint16_t)m_rom_ptr), p_ep, bytes);
+            m_rom_ptr += bytes;
         }
         else
         {
-            usb_ram_copy((uint8_t*)((uint16_t)g_usb_ram_ptr), p_ep, bytes);
-            g_usb_ram_ptr += bytes;
+            usb_ram_copy((uint8_t*)((uint16_t)m_ram_ptr), p_ep, bytes);
+            m_ram_ptr += bytes;
         }
         usb_arm_ep0_in(bd_table_index, bytes);
-        g_usb_bytes_2_send -= bytes;
+        m_bytes_2_send -= bytes;
         return;
     }
 
-    if(g_usb_send_short)
+    if(m_send_short)
     {
         usb_arm_ep0_in(bd_table_index, 0);
-        g_usb_send_short = false;
+        m_send_short = false;
     }
     
     #else
-    if(g_usb_bytes_2_send)
+    if(m_bytes_2_send)
     {
-        if(g_usb_sending_from == ROM)
+        if(m_sending_from == ROM)
         {
-            usb_rom_copy((const uint8_t*)((uint16_t)g_usb_rom_ptr), m_ep0_in, bytes);
-            g_usb_rom_ptr += bytes;
+            usb_rom_copy((const uint8_t*)((uint16_t)m_rom_ptr), m_ep0_in, bytes);
+            m_rom_ptr += bytes;
         }
         else
         {
-            usb_ram_copy((uint8_t*)((uint16_t)g_usb_ram_ptr), m_ep0_in, bytes);
-            g_usb_ram_ptr += bytes;
+            usb_ram_copy((uint8_t*)((uint16_t)m_ram_ptr), m_ep0_in, bytes);
+            m_ram_ptr += bytes;
         }
         usb_arm_ep0_in(bytes);
-        g_usb_bytes_2_send -= bytes;
+        m_bytes_2_send -= bytes;
         return;
     }
 
-    if(g_usb_send_short)
+    if(m_send_short)
     {
         usb_arm_ep0_in(0);
-        g_usb_send_short = false;
+        m_send_short = false;
     }
     #endif
 }
 
 void usb_out_control_transfer(void)
 {
-    uint8_t bytes = (uint8_t)g_usb_bytes_2_recv;
+    uint8_t bytes = (uint8_t)m_bytes_2_recv;
 
-    if(g_usb_bytes_2_recv > EP0_SIZE) bytes = EP0_SIZE;
+    if(m_bytes_2_recv > EP0_SIZE) bytes = EP0_SIZE;
 
     #if PINGPONG_MODE == PINGPONG_0_OUT || PINGPONG_MODE == PINGPONG_ALL_EP
-    if(PINGPONG_PARITY == EVEN) usb_ram_copy(m_ep0_out_even, g_usb_ram_ptr, bytes);
-    else usb_ram_copy(m_ep0_out_odd, g_usb_ram_ptr, bytes);
+    if(PINGPONG_PARITY == EVEN) usb_ram_copy(m_ep0_out_even, m_ram_ptr, bytes);
+    else usb_ram_copy(m_ep0_out_odd, m_ram_ptr, bytes);
     #else
-    usb_ram_copy(m_ep0_out, g_usb_ram_ptr, bytes);
+    usb_ram_copy(m_ep0_out, m_ram_ptr, bytes);
     #endif
 
-    g_usb_ram_ptr += bytes;
-    g_usb_bytes_2_recv -= bytes;
+    m_ram_ptr += bytes;
+    m_bytes_2_recv -= bytes;
 
-    if(g_usb_bytes_2_recv != 0) return;
+    if(m_bytes_2_recv != 0) return;
 
     #ifdef USE_OUT_CONTROL_FINISHED
     if(usb_out_control_finished()) usb_arm_in_status();
@@ -581,19 +598,39 @@ void usb_out_control_transfer(void)
     m_control_stage = STATUS_IN_STAGE;
 }
 
-void usb_rom_copy(const uint8_t *p_rom, uint8_t *p_ep, uint8_t bytes)
+void usb_set_num_out_control_bytes(uint16_t bytes)
+{
+    m_bytes_2_recv = bytes;
+}
+
+void usb_set_num_in_control_bytes(uint16_t bytes)
+{
+    m_bytes_2_send = bytes;
+}
+
+void usb_rom_copy(const uint8_t* p_rom, uint8_t* p_ep, uint8_t bytes)
 {
     for(uint8_t i = 0; i < bytes; i++) p_ep[i] = p_rom[i];
 }
 
-void usb_ram_copy(uint8_t *p_ram1, uint8_t *p_ram2, uint8_t bytes)
+void usb_ram_copy(uint8_t* p_ram1, uint8_t* p_ram2, uint8_t bytes)
 {
     for(uint8_t i = 0; i < bytes; i++) p_ram2[i] = p_ram1[i];
 }
 
-void usb_ram_set(uint8_t val, uint8_t *p_ram, uint16_t bytes)
+void usb_ram_set(uint8_t val, uint8_t* p_ram, uint16_t bytes)
 {
     for(uint16_t i = 0; i < bytes; i++) p_ram[i] = val;
+}
+
+void usb_set_ram_ptr(uint8_t* data)
+{
+    m_ram_ptr = data;
+}
+
+void usb_set_rom_ptr(const uint8_t* data)
+{
+    m_rom_ptr = data;
 }
 
 /* ************************************************************************** */
@@ -675,7 +712,7 @@ static void usb_restart(void)
     #endif
     
     m_update_address = false;
-    g_usb_send_short = false;
+    m_send_short = false;
     
     m_current_configuration = 0;
     
@@ -987,12 +1024,13 @@ static void get_descriptor(void)
 {
     bool perform_request_error = true;
     const uint16_t *ptr;
+    uint16_t bytes_available = 0;
     
     switch(g_usb_get_descriptor.DescriptorType)
     {
         case DEVICE_DESC:
-            g_usb_rom_ptr         = (const uint8_t*)&g_device_descriptor;
-            g_usb_bytes_available = sizeof(g_device_descriptor);
+            m_rom_ptr             = (const uint8_t*)&g_device_descriptor;
+            bytes_available       = sizeof(g_device_descriptor);
             perform_request_error = false;
             break;
         case DEVICE_QUALIFIER_DESC:
@@ -1000,41 +1038,31 @@ static void get_descriptor(void)
         case CONFIGURATION_DESC:
             if(g_usb_get_descriptor.DescriptorIndex >= NUM_CONFIGURATIONS) break;
 
-            g_usb_rom_ptr         = (const uint8_t*) g_config_descriptors[g_usb_get_descriptor.DescriptorIndex];
+            m_rom_ptr             = (const uint8_t*) g_config_descriptors[g_usb_get_descriptor.DescriptorIndex];
             ptr                   = (const uint16_t*)g_config_descriptors[g_usb_get_descriptor.DescriptorIndex];
-            g_usb_bytes_available = ptr[1];
+            bytes_available       = ptr[1];
             perform_request_error = false;
             break;
         case STRING_DESC:
             if(g_usb_get_descriptor.DescriptorIndex >= g_size_of_sd) break;
 
-            g_usb_rom_ptr         = (const uint8_t*)g_string_descriptors[g_usb_get_descriptor.DescriptorIndex];
-            g_usb_bytes_available = g_usb_rom_ptr[0];
+            m_rom_ptr             = (const uint8_t*)g_string_descriptors[g_usb_get_descriptor.DescriptorIndex];
+            bytes_available       = m_rom_ptr[0];
             perform_request_error = false;
             break;
         default:
-            if(usb_get_class_descriptor()) perform_request_error = false;
+            if(usb_get_class_descriptor(&m_rom_ptr, &bytes_available)) perform_request_error = false;
             break;
     }
     if(perform_request_error) usb_request_error();
     else
     {
-        if(g_usb_bytes_available < g_usb_get_descriptor.DescriptorLength)
-        {
-            g_usb_bytes_2_send = g_usb_bytes_available;
-            g_usb_send_short = g_usb_bytes_available % EP0_SIZE ? false : true;
-        }
-        else
-        {
-            g_usb_bytes_2_send = g_usb_get_descriptor.DescriptorLength;
-            g_usb_send_short   = false;
-        }
-        g_usb_sending_from = ROM;
+        usb_setup_in_control_transfer(ROM, bytes_available, g_usb_get_descriptor.DescriptorLength);
         
         #if PINGPONG_MODE == PINGPONG_ALL_EP
         EP0_IN_LAST_PPB ^= 1;
         usb_in_control_transfer();
-        if(g_usb_bytes_2_send != 0)
+        if(m_bytes_2_send != 0)
         {
             EP0_IN_DATA_TOGGLE_VAL ^= 1;
             EP0_IN_LAST_PPB ^= 1;
