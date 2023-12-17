@@ -60,7 +60,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC12-16F1xxx_DFP" vendor="Microchip" version="1.3.90"/>
+        <pack name="PIC12-16F1xxx_DFP" vendor="Microchip" version="1.7.242"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -246,7 +246,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC12-16F1xxx_DFP" vendor="Microchip" version="1.3.90"/>
+        <pack name="PIC12-16F1xxx_DFP" vendor="Microchip" version="1.7.242"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -432,7 +432,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC12-16F1xxx_DFP" vendor="Microchip" version="1.3.90"/>
+        <pack name="PIC12-16F1xxx_DFP" vendor="Microchip" version="1.7.242"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -618,7 +618,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18Fxxxx_DFP" vendor="Microchip" version="1.3.36"/>
+        <pack name="PIC18Fxxxx_DFP" vendor="Microchip" version="1.6.159"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -804,7 +804,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18Fxxxx_DFP" vendor="Microchip" version="1.3.36"/>
+        <pack name="PIC18Fxxxx_DFP" vendor="Microchip" version="1.6.159"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -990,7 +990,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18Fxxxx_DFP" vendor="Microchip" version="1.3.36"/>
+        <pack name="PIC18Fxxxx_DFP" vendor="Microchip" version="1.6.159"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -1176,7 +1176,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18Fxxxx_DFP" vendor="Microchip" version="1.3.36"/>
+        <pack name="PIC18Fxxxx_DFP" vendor="Microchip" version="1.6.159"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -1362,7 +1362,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18Fxxxx_DFP" vendor="Microchip" version="1.3.36"/>
+        <pack name="PIC18Fxxxx_DFP" vendor="Microchip" version="1.6.159"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -1548,7 +1548,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18Fxxxx_DFP" vendor="Microchip" version="1.3.36"/>
+        <pack name="PIC18Fxxxx_DFP" vendor="Microchip" version="1.6.159"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -1734,7 +1734,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18Fxxxx_DFP" vendor="Microchip" version="1.3.36"/>
+        <pack name="PIC18Fxxxx_DFP" vendor="Microchip" version="1.6.159"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -1920,7 +1920,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18Fxxxx_DFP" vendor="Microchip" version="1.3.36"/>
+        <pack name="PIC18Fxxxx_DFP" vendor="Microchip" version="1.6.159"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -2106,7 +2106,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18Fxxxx_DFP" vendor="Microchip" version="1.3.36"/>
+        <pack name="PIC18Fxxxx_DFP" vendor="Microchip" version="1.6.159"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -2292,7 +2292,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18Fxxxx_DFP" vendor="Microchip" version="1.3.36"/>
+        <pack name="PIC18Fxxxx_DFP" vendor="Microchip" version="1.6.159"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -2478,7 +2478,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-K_DFP" vendor="Microchip" version="1.8.249"/>
+        <pack name="PIC18F-K_DFP" vendor="Microchip" version="1.13.292"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -2664,7 +2664,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-K_DFP" vendor="Microchip" version="1.8.249"/>
+        <pack name="PIC18F-K_DFP" vendor="Microchip" version="1.13.292"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -2850,7 +2850,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-K_DFP" vendor="Microchip" version="1.8.249"/>
+        <pack name="PIC18F-K_DFP" vendor="Microchip" version="1.13.292"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -3036,7 +3036,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-K_DFP" vendor="Microchip" version="1.8.249"/>
+        <pack name="PIC18F-K_DFP" vendor="Microchip" version="1.13.292"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -3059,7 +3059,7 @@
         <makeCustomizationPreStepEnabled>false</makeCustomizationPreStepEnabled>
         <makeUseCleanTarget>false</makeUseCleanTarget>
         <makeCustomizationPreStep></makeCustomizationPreStep>
-        <makeCustomizationPostStepEnabled>false</makeCustomizationPostStepEnabled>
+        <makeCustomizationPostStepEnabled>true</makeCustomizationPostStepEnabled>
         <makeCustomizationPostStep>cp ${ImagePath} E:\ </makeCustomizationPostStep>
         <makeCustomizationPutChecksumInUserID>false</makeCustomizationPutChecksumInUserID>
         <makeCustomizationEnableLongLines>false</makeCustomizationEnableLongLines>
@@ -3222,7 +3222,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-K_DFP" vendor="Microchip" version="1.8.249"/>
+        <pack name="PIC18F-K_DFP" vendor="Microchip" version="1.13.292"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -3408,7 +3408,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.5.44"/>
+        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.7.159"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -3594,7 +3594,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.5.44"/>
+        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.7.159"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -3780,7 +3780,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.5.44"/>
+        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.7.159"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -3966,7 +3966,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.5.44"/>
+        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.7.159"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -4152,7 +4152,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.5.44"/>
+        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.7.159"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -4338,7 +4338,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.5.44"/>
+        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.7.159"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -4524,7 +4524,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.5.44"/>
+        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.7.159"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -4710,7 +4710,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.5.44"/>
+        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.7.159"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -4896,7 +4896,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.5.44"/>
+        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.7.159"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
@@ -5082,7 +5082,7 @@
         <platform>3</platform>
       </toolsSet>
       <packs>
-        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.5.44"/>
+        <pack name="PIC18F-J_DFP" vendor="Microchip" version="1.7.159"/>
       </packs>
       <ScriptingSettings>
       </ScriptingSettings>
