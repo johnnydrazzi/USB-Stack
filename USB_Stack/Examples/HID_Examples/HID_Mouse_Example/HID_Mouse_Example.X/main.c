@@ -285,7 +285,8 @@ static void flash_led(void)
 
 static void service_reports_to_send(void)
 {
-    if((g_hid_in_report_settings[0].Idle_Count_Overflow || m_send_report) && g_hid_report_sent){
+    if((g_hid_in_report_settings[0].Idle_Count_Overflow || m_send_report) && g_hid_report_sent)
+    {
         m_send_report = false;
         hid_send_report(0);
     }

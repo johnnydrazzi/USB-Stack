@@ -520,10 +520,10 @@ void main(void)
 {
     example_init();
     #ifdef USE_BOOT_LED
-	LED_OFF();
+    LED_OFF();
     LED_OUPUT();
     flash_led();
-	#endif
+    #endif
     
     usb_init();
     INTCONbits.PEIE = 1;
