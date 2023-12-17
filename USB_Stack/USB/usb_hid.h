@@ -162,13 +162,16 @@ extern volatile hid_in_report_setting_t g_hid_in_report_settings[HID_NUM_IN_REPO
 bool hid_class_request(void);
 
 /**
- * @fn bool hid_get_class_descriptor(void)
+ * @fn bool hid_get_class_descriptor(const uint8_t** descriptor, uint16_t* size)
  * 
  * @brief Used to service Get Class Descriptor Requests for HID.
  * 
+ * @param[out] descriptor The descriptor to respond with.
+ * @param[out] size Size of the response descriptor.
+ * 
  * @return Returns success (true) or failure (false) to execute the Request.
  */
-bool hid_get_class_descriptor(void);
+bool hid_get_class_descriptor(const uint8_t** descriptor, uint16_t* size);
 
 /**
  * @fn void hid_init(void)
@@ -190,6 +193,10 @@ void hid_tasks(void);
  * @fn void hid_clear_halt(uint8_t bdt_index, uint8_t ep, uint8_t dir)
  * 
  * @brief Clear Endpoints used by HID.
+ * 
+ * @param[in] bdt_index Buffer Descriptor Index.
+ * @param[in] ep Endpoint number.
+ * @param[in] dir Endpoint direction.
  * 
  * Used to inform the HID library to clear a halt/stall condition on
  * it's endpoint.
