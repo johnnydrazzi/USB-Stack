@@ -2,7 +2,7 @@
  * @file main.c
  * @brief Main C file.
  * @author John Izzard
- * @date 22/04/2023
+ * @date 17/12/2023
  * 
  * HID Custom Example.
  * Copyright (C) 2017-2023  John Izzard
@@ -170,37 +170,35 @@ void main(void)
 					#endif
                     break;
                 case COMMAND_GET_BUTTON_STATUS:
-                    if(g_hid_report_sent == true)
-                    {
-                        g_hid_in_report1.array[0] = COMMAND_GET_BUTTON_STATUS;
-                        g_hid_in_report1.array[1] = BUTTON_PRESSED ? false : true;
-                        hid_send_report(0);
-                    }
+                    if(g_hid_report_sent != true) break;
+
+                    g_hid_in_report1.array[0] = COMMAND_GET_BUTTON_STATUS;
+                    g_hid_in_report1.array[1] = BUTTON_PRESSED ? false : true;
+                    hid_send_report(0);
                     break;
                 case COMMAND_READ_POTENTIOMETER:
-                    if(g_hid_report_sent == true)
-                    {
-                        #if !defined(_16F1454)
-                        ADCON0bits.GO_nDONE = 1;
-                        while(ADCON0bits.GO_nDONE){}
-                        g_hid_in_report1.array[0] = COMMAND_READ_POTENTIOMETER;
-                        #if defined(_18F47J53_FAMILY_) || defined(_18F2458) || \
-                            defined(_18F4458) || defined(_18F2553) || defined(_18F4553)
-                        // 12-bit ADC. If not converted to 10-bit number the
-                        // application will report an exception.
-                        g_hid_in_report1.array[1] = (ADRESH << 6) | (ADRESL >> 2); 
-                        g_hid_in_report1.array[2] = ADRESH >> 2;
-                        #else
-                        g_hid_in_report1.array[1] = ADRESL;
-                        g_hid_in_report1.array[2] = ADRESH;
-                        #endif
-                        #else
-                        g_hid_in_report1.array[0] = COMMAND_READ_POTENTIOMETER;
-                        g_hid_in_report1.array[1] = 0;
-                        g_hid_in_report1.array[2] = 0;
-                        #endif
-                        hid_send_report(0);
-                    }
+                    if(g_hid_report_sent != true) break;
+
+                    #if !defined(_16F1454)
+                    ADCON0bits.GO_nDONE = 1;
+                    while(ADCON0bits.GO_nDONE){}
+                    g_hid_in_report1.array[0] = COMMAND_READ_POTENTIOMETER;
+                    #if defined(_18F47J53_FAMILY_) || defined(_18F2458) || \
+                        defined(_18F4458) || defined(_18F2553) || defined(_18F4553)
+                    // 12-bit ADC. If not converted to 10-bit number the
+                    // application will report an exception.
+                    g_hid_in_report1.array[1] = (ADRESH << 6) | (ADRESL >> 2); 
+                    g_hid_in_report1.array[2] = ADRESH >> 2;
+                    #else
+                    g_hid_in_report1.array[1] = ADRESL;
+                    g_hid_in_report1.array[2] = ADRESH;
+                    #endif
+                    #else
+                    g_hid_in_report1.array[0] = COMMAND_READ_POTENTIOMETER;
+                    g_hid_in_report1.array[1] = 0;
+                    g_hid_in_report1.array[2] = 0;
+                    #endif
+                    hid_send_report(0);
                     break;
             }
             #if PINGPONG_MODE == PINGPONG_1_15 || PINGPONG_MODE == PINGPONG_ALL_EP
