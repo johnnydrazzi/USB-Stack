@@ -140,8 +140,10 @@ void main(void)
         service_reports_to_send();
         
         // Uncomment the following for Keyboard Example
-        if(g_hid_sent_report[0] == true && g_hid_report_sent){
-            if(BUTTON_WAS_PRESSED){
+        if(g_hid_sent_report[0] == true && g_hid_report_sent)
+        {
+            if(BUTTON_WAS_PRESSED)
+            {
                 m_released = false;
                 ascii_2_key(m_message[i]);
                 send_key(g_key_result.Modifier, g_key_result.KeyCode);
@@ -157,12 +159,15 @@ void main(void)
         }
         
         // Uncomment the following for Consumer Example
-//        if(g_hid_sent_report[1] == true && g_hid_report_sent){
-//            if(BUTTON_WAS_PRESSED){
+//        if(g_hid_sent_report[1] == true && g_hid_report_sent)
+//        {
+//            if(BUTTON_WAS_PRESSED)
+//            {
 //                m_released = false;
 //                send_consumer(_MUTE);
 //            }
-//            else if(BUTTON_WAS_RELEASED){
+//            else if(BUTTON_WAS_RELEASED)
+//            {
 //                m_released = true;
 //                send_consumer(0);
 //            }
