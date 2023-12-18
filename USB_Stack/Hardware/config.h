@@ -44,7 +44,6 @@
 #define MHz_48 12
 #endif
 
-#define _XTAL_FREQ          48000000      // Don't modify.
 #define PLL_STARTUP_DELAY() __delay_ms(3) // Don't modify.
 
 // PIC16F145X Settings:

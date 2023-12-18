@@ -23,10 +23,10 @@
 
 #include <xc.h>
 #include <stdint.h>
-#include "../../../Hardware/fuses.h"
-#include "../../../Hardware/config.h"
-#include "../../../USB/usb.h"
-#include "../../../USB/usb_msd.h"
+#include "fuses.h"
+#include "config.h"
+#include "usb.h"
+#include "usb_msd.h"
 #include "flash.h"
 
 #if _HTC_EDITION_ == 0

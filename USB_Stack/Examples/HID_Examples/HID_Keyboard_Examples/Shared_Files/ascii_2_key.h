@@ -1,5 +1,5 @@
 /**
- * @file ASCII_2_KEY.h
+ * @file ascii_2_key.h
  * @brief Convert ASCII to HID Key values.
  * @author John Izzard
  * @date 05/06/2020
@@ -24,8 +24,8 @@
 #define ASCII_2_KEY_H
 
 #include <stdint.h>
-#include "../../../../USB/usb_hid.h"
-#include "../../../../USB/usb_hid_pages.h"
+#include "usb_hid.h"
+#include "usb_hid_pages.h"
 
 // Choose a End of Line Character (\n or \r) used to convert to enter/return.
 // Windows uses \r\n so use either \n or \r.

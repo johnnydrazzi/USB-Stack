@@ -86,12 +86,12 @@
 
 #include <xc.h>
 #include <stdint.h>
-#include "../../../../Hardware/fuses.h"
-#include "../../../../Hardware/config.h"
-#include "../../../../USB/usb.h"
-#include "../../../../USB/usb_hid.h"
-#include "../Shared_Files/usb_hid_reports.h"
-#include "../Shared_Files/ASCII_2_KEY.h"
+#include "fuses.h"
+#include "config.h"
+#include "usb.h"
+#include "usb_hid.h"
+#include "usb_hid_reports.h"
+#include "ascii_2_key.h"
 
 #if INTERRUPTS_MASK == 0
 #error "RubberDucky Example needs usb interrupt method, because blocking is used."

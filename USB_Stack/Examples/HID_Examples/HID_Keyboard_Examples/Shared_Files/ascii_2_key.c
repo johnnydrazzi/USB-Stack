@@ -1,5 +1,5 @@
 /**
- * @file ASCII_2_KEY.c
+ * @file ascii_2_key.c
  * @brief Convert ASCII to HID Key values.
  * @author John Izzard
  * @date 05/06/2020
@@ -22,7 +22,7 @@
  */
 #include <stdint.h>
 #include <stdbool.h>
-#include "ASCII_2_KEY.h"
+#include "ascii_2_key.h"
 
 #define IS_CHARACTER      (val > 31 && val < 127)
 #define IS_CAPITAL_LETTER (val > 64 && val < 91)

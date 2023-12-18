@@ -20,7 +20,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-#include "../../../USB/usb_scsi.h"
+#include "usb_scsi.h"
 
 // String Settings
 #define SCSI_VENDER_ID   {'M','i','c','r','o','c','h','p'}

@@ -21,11 +21,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../../../../USB/usb_config.h"
-#include "../../../../USB/usb_hid.h"
-#include "../../../../USB/usb_hid_report_defines.h"
-#include "../../../../USB/usb_hid_pages.h"
-#include "../../../../USB/usb_ch9.h"
+#include "usb_config.h"
+#include "usb_hid.h"
+#include "usb_hid_report_defines.h"
+#include "usb_hid_pages.h"
+#include "usb_ch9.h"
 
 // Report Descriptor (Keyboard)
 const uint8_t g_hid_report_descriptor[] =

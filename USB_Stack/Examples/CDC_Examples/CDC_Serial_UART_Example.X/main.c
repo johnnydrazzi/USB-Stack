@@ -87,11 +87,11 @@
 #include <xc.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "../../../Hardware/fuses.h"
-#include "../../../Hardware/config.h"
-#include "../../../USB/usb.h"
-#include "UART.h"
-#include "../../../USB/usb_cdc.h"
+#include "fuses.h"
+#include "config.h"
+#include "usb.h"
+#include "uart.h"
+#include "usb_cdc.h"
 
 static void example_init(void);
 #ifdef USE_BOOT_LED
@@ -123,7 +123,7 @@ void main(void)
     flash_led();
 	#endif
     
-    UART_Init();
+    uart__init(0);
     
     // Make UART pins digital.
     #if defined(_18F13K50) || defined(_18F14K50)
@@ -327,8 +327,8 @@ static void vcp_tasks(void)
             RTS = RTS_ACTIVE ^ 1;
         }
         #endif
-        if(m_rx_index < RX_BUFFER_SIZE) m_rx_buffer[m_rx_index++] = UART_Read(); // If m_rx_index is not out of bounds, read the Rx data and put in buffer.
-    }                                                                            // If this is false (buffer is full) data will be lost.
+        if(m_rx_index < RX_BUFFER_SIZE) m_rx_buffer[m_rx_index++] = uart__read(0); // If m_rx_index is not out of bounds, read the Rx data and put in buffer.
+    }                                                                              // If this is false (buffer is full) data will be lost.
 
     // If there is data in m_rx_buffer and USB is not busy, send it.
     if(m_serial_pkt_sent && m_rx_index)
@@ -359,26 +359,26 @@ static void vcp_tasks(void)
         #if defined(USE_RTS) && !defined(USE_DTR)
         if(CTS == CTS_ACTIVE) // Block if CTS is not active.
         {
-            UART_Write(m_tx_buffer[m_tx_index]);
+            uart__write(0, m_tx_buffer[m_tx_index]);
             m_tx_index++;
             m_tx_to_cpy--;
         }
         #elif !defined(USE_RTS) && defined(USE_DTR)
         if(DSR == DSR_ACTIVE) // Block if DSR is not active.
         {
-            UART_Write(m_tx_buffer[m_tx_index]);
+            uart__write(0, m_tx_buffer[m_tx_index]);
             m_tx_index++;
             m_tx_to_cpy--;
         }
         #elif defined(USE_RTS) && defined(USE_DTR)
         if(CTS == CTS_ACTIVE && DSR == DSR_ACTIVE) // Block if either CTS or DSR is not active.
         {
-            UART_Write(m_tx_buffer[m_tx_index]);
+            uart__write(0, m_tx_buffer[m_tx_index]);
             m_tx_index++;
             m_tx_to_cpy--;
         }
         #else
-        UART_Write(m_tx_buffer[m_tx_index]);
+        uart__write(0, m_tx_buffer[m_tx_index]);
         m_tx_index++;
         m_tx_to_cpy--;
         #endif

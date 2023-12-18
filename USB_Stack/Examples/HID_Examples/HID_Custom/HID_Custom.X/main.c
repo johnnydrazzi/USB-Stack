@@ -87,10 +87,10 @@
 #include <xc.h>
 #include <stdint.h>
 #include <stdbool.h>
-#include "../../../../Hardware/fuses.h"
-#include "../../../../Hardware/config.h"
-#include "../../../../USB/usb.h"
-#include "../../../../USB/usb_hid.h"
+#include "fuses.h"
+#include "config.h"
+#include "usb.h"
+#include "usb_hid.h"
 #include "usb_hid_reports.h"
 
 typedef enum

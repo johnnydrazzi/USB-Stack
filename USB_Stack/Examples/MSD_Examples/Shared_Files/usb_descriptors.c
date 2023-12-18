@@ -21,8 +21,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-#include "../../../USB/usb_msd.h"
-#include "../../../USB/usb_ch9.h"
+#include "usb_msd.h"
+#include "usb_ch9.h"
 
 /** Device Descriptor */
 const ch9_device_descriptor_t g_device_descriptor =

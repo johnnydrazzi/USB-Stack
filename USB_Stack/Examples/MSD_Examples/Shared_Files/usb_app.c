@@ -21,9 +21,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 #include <stdbool.h>
-#include "../../../USB/usb.h"
-#include "../../../USB/usb_app.h"
-#include "../../../USB/usb_msd.h"
+#include "usb.h"
+#include "usb_app.h"
+#include "usb_msd.h"
 
 
 bool usb_service_class_request(void)

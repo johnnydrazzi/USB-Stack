@@ -25,7 +25,7 @@
 #define USB_HID_REPORTS_H
 
 #include <stdint.h>
-#include "../../../../USB/usb_hid_config.h"
+#include "usb_hid_config.h"
 
 typedef struct
 {
