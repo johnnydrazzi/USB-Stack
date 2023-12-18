@@ -99,6 +99,8 @@ static void flash_led(void);
 static void __interrupt() isr(void);
 static void serial_print_string(char* string);
 static void serial_echo(void);
+static void send(uint8_t amount);
+static void receive(void);
 
 static bool volatile m_serial_pkt_sent = true;
 static bool volatile m_serial_pkt_rcv = false;
@@ -290,31 +292,30 @@ static void serial_print_string(char* string)
     uint8_t i = 0;
     while(*string)
     {
-        while(!m_serial_pkt_sent){}
         g_cdc_dat_ep_in[i++] = *string++;
-        if(i == CDC_DAT_EP_SIZE)
-        {
-            m_serial_pkt_sent = false;
-            cdc_arm_data_ep_in(CDC_DAT_EP_SIZE);
-            i = 0;
-        }
+        i %= CDC_DAT_EP_SIZE;
+        if(!i) send(CDC_DAT_EP_SIZE);
     }
-    if(i)
-    {
-        while(!m_serial_pkt_sent){}
-        m_serial_pkt_sent = false;
-        cdc_arm_data_ep_in(i);
-    }
+    if(i) send(i);
 }
 
 static void serial_echo(void)
 {
-    if(m_serial_pkt_rcv && m_serial_pkt_sent)
-    {
-        usb_ram_copy(g_cdc_dat_ep_out, g_cdc_dat_ep_in, g_cdc_num_data_out);
-        m_serial_pkt_sent = false;
-        cdc_arm_data_ep_in(g_cdc_num_data_out);
-        m_serial_pkt_rcv = false;
-        cdc_arm_data_ep_out();
-    }
+    receive();
+    usb_ram_copy(g_cdc_dat_ep_out, g_cdc_dat_ep_in, g_cdc_num_data_out);
+    send(g_cdc_num_data_out);
+}
+
+static void send(uint8_t amount)
+{
+    m_serial_pkt_sent = false;
+    cdc_arm_data_ep_in(amount);
+    while(!m_serial_pkt_sent){}
+}
+
+static void receive(void)
+{
+    while(!m_serial_pkt_rcv){}
+    m_serial_pkt_rcv = false;
+    cdc_arm_data_ep_out();
 }

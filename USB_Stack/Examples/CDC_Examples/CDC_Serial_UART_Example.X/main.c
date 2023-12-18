@@ -99,6 +99,9 @@ static void flash_led(void);
 #endif
 static void __interrupt() isr(void);
 static void vcp_tasks(void);
+static void uart_tx_byte(void);
+static void copy_ep_out_to_tx_buffer(void);
+static void copy_rx_buffer_to_ep_in(void);
 
 #define RX_BUFFER_SIZE 64
 #define TX_BUFFER_SIZE 64
@@ -108,7 +111,7 @@ static bool volatile m_serial_pkt_rcv = false;
 
 static uint8_t m_rx_buffer[RX_BUFFER_SIZE];
 static uint8_t m_rx_index = 0;
-static bool volatile m_rx_buffer_full = false;
+static bool volatile m_rx_buffer_almost_full = false;
 
 static uint8_t m_tx_buffer[TX_BUFFER_SIZE];
 static uint8_t m_tx_index = 0;
@@ -278,16 +281,13 @@ static void flash_led(void)
 void cdc_set_control_line_state(void)
 {
     #ifdef USE_RTS
-    if(g_cdc_set_control_line_state.RTS_bit) g_cdc_has_set_rts = true;
-    else g_cdc_has_set_rts = false;
+    g_cdc_has_set_rts = g_cdc_set_control_line_state.RTS_bit ? true : false;
     
     // If the buffer is not full and the computer wants to set RTS, set RTS.
-    if((m_rx_buffer_full == false) && g_cdc_has_set_rts) RTS = RTS_ACTIVE;
-    else RTS = RTS_ACTIVE ^ 1; 
+    RTS = !m_rx_buffer_almost_full && g_cdc_has_set_rts ? RTS_ACTIVE : RTS_ACTIVE ^ 1;
     #endif
     #ifdef USE_DTR
-    if(g_cdc_set_control_line_state.DTR_bit) DTR = DTR_ACTIVE;
-    else DTR = DTR_ACTIVE ^ 1;
+    DTR = g_cdc_set_control_line_state.DTR_bit ? DTR_ACTIVE : DTR_ACTIVE ^ 1;
     #endif
 }
 
@@ -323,7 +323,7 @@ static void vcp_tasks(void)
         #ifdef USE_RTS
         if(m_rx_index == RX_BUFFER_SIZE - 5) // If buffer is almost full
         {
-            m_rx_buffer_full = true;
+            m_rx_buffer_almost_full = true;
             RTS = RTS_ACTIVE ^ 1;
         }
         #endif
@@ -334,22 +334,18 @@ static void vcp_tasks(void)
     if(m_serial_pkt_sent && m_rx_index)
     {
         m_serial_pkt_sent = false;
-        usb_ram_copy(m_rx_buffer, g_cdc_dat_ep_in, m_rx_index);
-        cdc_arm_data_ep_in(m_rx_index);
-        m_rx_index = 0;
+        copy_rx_buffer_to_ep_in();
         #ifdef USE_RTS
-        if(g_cdc_has_set_rts && (RTS != RTS_ACTIVE)) RTS = RTS_ACTIVE;
-        m_rx_buffer_full = false;
+        if(g_cdc_has_set_rts) RTS = RTS_ACTIVE;
+        m_rx_buffer_almost_full = false;
         #endif
     }
 
     // If serial data was received on the CDC endpoint, and UART currently has no data to send.
-    if(m_serial_pkt_rcv && (m_tx_to_cpy == 0))
+    if(m_serial_pkt_rcv && !m_tx_to_cpy)
     {
-        m_serial_pkt_rcv = false;                // Reset m_serial_pkt_rcv.
-        m_tx_to_cpy = g_cdc_num_data_out;        // Number of bytes to grab from EP.
-        m_tx_index = 0;                          // Reset m_tx_index.
-        usb_ram_copy(g_cdc_dat_ep_out, m_tx_buffer, m_tx_to_cpy); // Copy from endpoint to m_tx_buffer.
+        m_serial_pkt_rcv = false; // Reset m_serial_pkt_rcv.
+        copy_ep_out_to_tx_buffer();
         cdc_arm_data_ep_out();
     }
 
@@ -357,30 +353,16 @@ static void vcp_tasks(void)
     if(m_tx_to_cpy)
     {
         #if defined(USE_RTS) && !defined(USE_DTR)
-        if(CTS == CTS_ACTIVE) // Block if CTS is not active.
-        {
-            uart__write(0, m_tx_buffer[m_tx_index]);
-            m_tx_index++;
-            m_tx_to_cpy--;
-        }
+        // Block if CTS is not active.
+        if(CTS == CTS_ACTIVE) uart_tx_byte();
         #elif !defined(USE_RTS) && defined(USE_DTR)
-        if(DSR == DSR_ACTIVE) // Block if DSR is not active.
-        {
-            uart__write(0, m_tx_buffer[m_tx_index]);
-            m_tx_index++;
-            m_tx_to_cpy--;
-        }
+        // Block if DSR is not active.
+        if(DSR == DSR_ACTIVE) uart_tx_byte();
         #elif defined(USE_RTS) && defined(USE_DTR)
-        if(CTS == CTS_ACTIVE && DSR == DSR_ACTIVE) // Block if either CTS or DSR is not active.
-        {
-            uart__write(0, m_tx_buffer[m_tx_index]);
-            m_tx_index++;
-            m_tx_to_cpy--;
-        }
+        // Block if either CTS or DSR is not active.
+        if(CTS == CTS_ACTIVE && DSR == DSR_ACTIVE) uart_tx_byte();
         #else
-        uart__write(0, m_tx_buffer[m_tx_index]);
-        m_tx_index++;
-        m_tx_to_cpy--;
+        uart_tx_byte();
         #endif
     }
 
@@ -401,4 +383,24 @@ static void vcp_tasks(void)
     #if defined(USE_DTR) || defined(USE_DCD)
     cdc_notification_tasks();
     #endif
+}
+
+static void uart_tx_byte(void)
+{
+    uart__write(0, m_tx_buffer[m_tx_index++]);
+    m_tx_to_cpy--;
+}
+
+static void copy_ep_out_to_tx_buffer(void)
+{
+    m_tx_to_cpy = g_cdc_num_data_out;        // Number of bytes to grab from EP.
+    m_tx_index = 0;                          // Reset m_tx_index.
+    usb_ram_copy(g_cdc_dat_ep_out, m_tx_buffer, m_tx_to_cpy); // Copy from endpoint to m_tx_buffer.
+}
+
+static void copy_rx_buffer_to_ep_in(void)
+{
+    usb_ram_copy(m_rx_buffer, g_cdc_dat_ep_in, m_rx_index);
+    cdc_arm_data_ep_in(m_rx_index);
+    m_rx_index = 0;
 }
