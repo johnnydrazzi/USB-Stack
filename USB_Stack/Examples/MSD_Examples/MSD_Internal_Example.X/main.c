@@ -677,9 +677,7 @@ void msd_rx_sector(void)
     if(addr < END_OF_FLASH) // If address is in flash space.
     {
         #if defined(_PIC14E)
-        uint8_t *p_ep;
-        if(MSD_EP_IN_LAST_PPB == ODD) p_ep = g_msd_ep_in_odd;
-        else p_ep = g_msd_ep_in_even;
+        uint8_t *p_ep = MSD_EP_IN_LAST_PPB == ODD ? g_msd_ep_in_odd : g_msd_ep_in_even;
         
         Flash_ReadBytes((uint24_t)(addr + g_msd_byte_of_sect), 64, buffer);
         for(i = 0, x = 0; i < 64; i += 2, x++) p_ep[x] = buffer[i];
@@ -741,9 +739,7 @@ void msd_tx_sector(void)
     {
         #if PINGPONG_MODE == PINGPONG_1_15 || PINGPONG_MODE == PINGPONG_ALL_EP
         #if defined(_PIC14E)
-        uint8_t *p_ep;
-        if(MSD_EP_OUT_LAST_PPB == ODD) p_ep = g_msd_ep_out_odd;
-        else p_ep = g_msd_ep_out_even;
+        uint8_t *p_ep = MSD_EP_OUT_LAST_PPB == ODD ? g_msd_ep_out_odd : g_msd_ep_out_even;
         
         for(i = 0, x = 0; i < 64; i += 2, x++)
         {
