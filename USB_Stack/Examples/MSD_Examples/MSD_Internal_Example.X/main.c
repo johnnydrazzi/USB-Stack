@@ -686,7 +686,7 @@ void msd_rx_sector(void)
         
         #else
         #ifdef MSD_LIMITED_RAM
-        if(MSD_EP_IN_LAST_PPB == ODD) Flash_ReadBytes((uint24_t)(addr), 64, g_msd_ep_in_odd);
+        if(MSD_EP_IN_LAST_PPB == ODD) Flash_ReadBytes((uint24_t)(addr + g_msd_byte_of_sect), 64, g_msd_ep_in_odd);
         else Flash_ReadBytes((uint24_t)(addr + g_msd_byte_of_sect), 64, g_msd_ep_in_even);
         #else
         Flash_ReadBytes((uint24_t)addr, 512, g_msd_sect_data);
